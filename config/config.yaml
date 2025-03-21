@@ -1,0 +1,36 @@
+enable_cache: False
+extra:
+  tags: zenml-projects
+settings:
+  docker:
+    required_integrations:
+      - mlflow
+steps:
+  model_train:
+    experiment_tracker: mlflow_tracker
+  evaluation:
+    experiment_tracker: mlflow_tracker
+
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data
+  source_URL: https://drive.google.com/file/d/1ixu1NshIjq9oc_pankfoiCuFNA8aLxSA/view?usp=sharing
+  local_data_file: artifacts/data/data.zip
+  unzip_dir: artifacts/data_ingestion
+  gurgaon_data_path: artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv
+  gurgaon_flats_data_path: artifacts/data_ingestion/gurgaon_properties/flats.csv
+  gurgaon_appartments_data_path: artifacts/data_ingestion/gurgaon_properties/appartments.csv
+  gurgaon_houses_data_path: artifacts/data_ingestion/gurgaon_properties/houses.csv
+
+
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  directory: artifacts/data_transformation/preprocessor.pkl
+
+data_divider:
+  root_dir: artifacts/data_divider
+  train_dir: artifacts/data_divider/train.csv
+  test_dir: artifacts/data_divider/test.csv
+  validation_dir: artifacts/data_divider/validation.csv
