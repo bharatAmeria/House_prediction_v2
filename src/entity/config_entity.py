@@ -26,6 +26,15 @@ class DataIngestionConfig:
     gurgaon_appartments_data_path: Path
     gurgaon_houses_data_path: Path
 
+@dataclass
+class DataCleaningConfig:
+    gurgaon_data_path: Path
+    gurgaon_flats_data_path: Path
+    gurgaon_appartments_data_path: Path
+    gurgaon_houses_data_path: Path
+
+
+
 
 
 

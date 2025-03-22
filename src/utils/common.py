@@ -1,6 +1,6 @@
 import json
 import pickle
-
+import pandas as pd 
 import numpy as np
 from box import ConfigBox
 import yaml
@@ -166,3 +166,61 @@ def scorer(model_name, model, preprocessor=None, y_transformed=None, X=None):
     output.append(mean_absolute_error(np.expm1(y_test), y_pred))
 
     return output
+
+
+@ensure_annotations
+def read_csv(path_to_csv: Path) -> pd.DataFrame:
+    """Reads a CSV file and returns a DataFrame.
+
+    Args:
+        path_to_csv (Path): Path to the CSV file.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        ValueError: If the CSV file is empty.
+
+    Returns:
+        pd.DataFrame: Pandas DataFrame containing the data.
+    """
+    try:
+        if not path_to_csv.exists():
+            raise FileNotFoundError(f"CSV file not found: {path_to_csv}")
+
+        df = pd.read_csv(path_to_csv)
+
+        if df.empty:
+            raise ValueError("CSV file is empty")
+
+        logging.info(f"CSV file loaded successfully from: {path_to_csv}")
+        return df
+
+    except Exception as e:
+        logging.exception(f"Error reading CSV file: {path_to_csv}")
+        raise e
+
+
+@ensure_annotations
+def save_csv(df: pd.DataFrame, path_to_csv: Path, index: bool = False):
+    """Saves a DataFrame to a CSV file.
+
+    Args:
+        df (pd.DataFrame): DataFrame to be saved.
+        path_to_csv (Path): Path to save the CSV file.
+        index (bool, optional): Whether to include the index. Defaults to False.
+
+    Raises:
+        ValueError: If DataFrame is empty.
+    """
+    try:
+        if df.empty:
+            raise ValueError("DataFrame is empty, cannot save to CSV")
+
+        dir_path = path_to_csv.parent
+        os.makedirs(dir_path, exist_ok=True)
+
+        df.to_csv(path_to_csv, index=index)
+        logging.info(f"CSV file saved at: {path_to_csv}")
+
+    except Exception as e:
+        logging.exception(f"Error saving CSV file: {path_to_csv}")
+        raise e

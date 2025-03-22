@@ -1,5 +1,5 @@
-from src.entity.config_entity import DataIngestionConfig
-from src.utils.common import read_yaml, create_directories
+from src.entity.config_entity import *
+from src.utils.common import read_yaml, create_directories, read_csv
 from src.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 
 
@@ -27,6 +27,18 @@ class ConfigurationManager:
         )
 
         return data_ingestion_config
+    
+    def get_data_cleaning_config(self) -> DataCleaningConfig:
+        config = self.config.data_cleaning
+
+        data_cleaning_config = DataCleaningConfig(
+            gurgaon_data_path= config.gurgaon_houses_data_path,
+            gurgaon_flats_data_path= config.gurgaon_flats_data_path,
+            gurgaon_appartments_data_path = config.gurgaon_appartments_data_path,
+            gurgaon_houses_data_path= config.gurgaon_houses_data_path
+        )
+
+        return data_cleaning_config
 
     # def get_data_transformation_config(self) -> DataTransformationConfig:
     #     config = self.config.data_transformation

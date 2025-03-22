@@ -1,10 +1,10 @@
 import sys
+
+from src.constants import *
 from src.logger import logging
 from src.exception import MyException
 from src.data.data_ingestion import IngestData
 from src.config.configuration import ConfigurationManager
-
-STAGE_NAME = "Data Ingestion stage"
 
 class DataIngestionTrainingPipeline:
     def __init__(self):
@@ -21,7 +21,7 @@ class DataIngestionTrainingPipeline:
 
 if __name__ == '__main__':
     try:
-        logging.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+        logging.info(f">>>>>> stage {INGESTION_STAGE_NAME} started <<<<<<")
         obj = DataIngestionTrainingPipeline()
         obj.main()
     except MyException as e:
