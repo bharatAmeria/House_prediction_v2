@@ -25,11 +25,11 @@ REQUIREMENTS_FILE = "requirements.txt"
 Data ingestion related constant 
 ---------------------------------------------------------------
 """
-INGESTION_STAGE_NAME = "Data Cleaning"
+INGESTION_STAGE_NAME = "Data Ingestion"
 
 """
 ---------------------------------------------------------------
-Data Cleaning related constant 
+Data PrePrecessing related constant 
 ---------------------------------------------------------------
 """
-CLEANING_STAGE_NAME = "Data Cleaning"
+PRE_PROCESSING_STAGE_NAME = "Data Pre-Processing"

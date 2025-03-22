@@ -16,10 +16,10 @@ except MyException as e:
     raise e
 
 try:
-    logging.info(f">>>>>> stage {CLEANING_STAGE_NAME} started <<<<<<")
+    logging.info(f">>>>>> stage {PRE_PROCESSING_STAGE_NAME} started <<<<<<")
     data_ingestion = DataCleaningPipeline()
     data_ingestion.main()
-    logging.info(f">>>>>> stage {CLEANING_STAGE_NAME} completed <<<<<<\n\nx==========x")
+    logging.info(f">>>>>> stage {PRE_PROCESSING_STAGE_NAME} completed <<<<<<\n\nx==========x")
 except MyException as e:
     logging.exception(e, sys)
     raise e

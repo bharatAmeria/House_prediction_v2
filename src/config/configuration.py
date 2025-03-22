@@ -16,14 +16,10 @@ class ConfigurationManager:
         create_directories([config.root_dir])
 
         data_ingestion_config = DataIngestionConfig(
-            root_dir=config.root_dir,
-            source_URL=config.source_URL,
-            local_data_file=config.local_data_file,
-            unzip_dir=config.unzip_dir,
-            gurgaon_data_path= config.gurgaon_houses_data_path,
-            gurgaon_flats_data_path= config.gurgaon_flats_data_path,
-            gurgaon_appartments_data_path = config.gurgaon_appartments_data_path,
-            gurgaon_houses_data_path= config.gurgaon_houses_data_path
+            root_dir = config.root_dir,
+            source_URL = config.source_URL,
+            local_data_file = config.local_data_file,
+            unzip_dir = config.unzip_dir,
         )
 
         return data_ingestion_config
@@ -31,7 +27,15 @@ class ConfigurationManager:
     def get_data_cleaning_config(self) -> DataCleaningConfig:
         config = self.config.data_cleaning
 
+        create_directories([config.cleaned_data_dir])
+
         data_cleaning_config = DataCleaningConfig(
+            cleaned_data_dir = config.cleaned_data_dir, 
+            cleaned_gurgaon_houses_data_path = config.cleaned_gurgaon_houses_data_path, 
+            cleaned_gurgaon_data_path = config.cleaned_gurgaon_data_path,
+            cleaned_gurgaon_flats_data_path = config.cleaned_gurgaon_flats_data_path,
+            cleaned_gurgaon_appartments_data_path = config.cleaned_gurgaon_appartments_data_path,
+
             gurgaon_data_path= config.gurgaon_houses_data_path,
             gurgaon_flats_data_path= config.gurgaon_flats_data_path,
             gurgaon_appartments_data_path = config.gurgaon_appartments_data_path,
