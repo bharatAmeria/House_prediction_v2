@@ -18,7 +18,7 @@ class DataCleaningPipeline:
         data_cleaning_config = config.get_data_cleaning_config()
 
         logging.info(">>>>>Housing Data Preprocessing Started<<<<<")
-        house_data = pd.read_csv(data_cleaning_config.gurgaon_houses_data_path)
+        house_data = pd.read_csv(data_cleaning_config.gurgaon_houses_data)
         house_data_cleaning = HouseDataCleaning(data=house_data, 
                                            strategy=HouseDataPreProcessingStrategy(), 
                                            config=data_cleaning_config
@@ -26,13 +26,17 @@ class DataCleaningPipeline:
         house_cleaned_data = house_data_cleaning.handle_data()
 
         logging.info(">>>>>Flats Data Preprocessing Started<<<<<")
-        flats_data = pd.read_csv(data_cleaning_config.gurgaon_flats_data_path)
+        flats_data = pd.read_csv(data_cleaning_config.gurgaon_flats_data)
         flats_data_cleaning = FlatsDataCleaning(data=flats_data,
                                                 strategy=FlatsDataPreProcessingStrategy(),
                                                 config=data_cleaning_config
                                                 )
+        flats_cleaned_data = flats_data_cleaning.handle_data()
+
+        merged_data = pd.concat([flats_cleaned_data, house_cleaned_data],ignore_index=True)
+
         
-        return house_cleaned_data, flats_data_cleaning
+        return merged_data
 
 
 if __name__ == '__main__':
