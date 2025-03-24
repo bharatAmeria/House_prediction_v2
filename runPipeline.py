@@ -3,7 +3,7 @@ from src.logger import logging
 from src.exception import MyException
 from src.constants import *
 from src.pipeline.stage01_data_ingestion import DataIngestionTrainingPipeline
-from src.pipeline.stage02_data_cleaning import DataCleaningPipeline
+from src.pipeline.stage02_data_cleaning import DataProcessingPipeline
 
 
 try:
@@ -17,8 +17,8 @@ except MyException as e:
 
 try:
     logging.info(f">>>>>> stage {PRE_PROCESSING_STAGE_NAME} started <<<<<<")
-    data_ingestion = DataCleaningPipeline()
-    data_ingestion.main()
+    data_processing= DataProcessingPipeline()
+    data_processing.main()
     logging.info(f">>>>>> stage {PRE_PROCESSING_STAGE_NAME} completed <<<<<<\n\nx==========x")
 except MyException as e:
     logging.exception(e, sys)

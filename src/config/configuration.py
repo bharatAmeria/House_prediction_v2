@@ -1,5 +1,5 @@
 from src.entity.config_entity import *
-from src.utils.common import read_yaml, create_directories, read_csv
+from src.utils.common import read_yaml, create_directories
 from src.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
 
 

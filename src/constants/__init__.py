@@ -33,3 +33,6 @@ Data PrePrecessing related constant
 ---------------------------------------------------------------
 """
 PRE_PROCESSING_STAGE_NAME = "Data Pre-Processing"
+N_CLUSTERS = 3
+RANDOM_STATE = 42
+WCSS_REDUCED = []
