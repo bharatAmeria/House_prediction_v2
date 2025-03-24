@@ -1,6 +1,7 @@
 import sys
 import pandas as pd
-
+import pickle
+from src.utils.common import save_csv
 from src.constants import *
 from src.logger import logging
 from src.exception import MyException
@@ -9,7 +10,7 @@ from src.data.house_data_processing import HouseDataCleaning, HouseDataPreProces
 from src.data.flats_data_processing import FlatsDataCleaning, FlatsDataPreProcessingStrategy
 from src.outlier.outlier_treatment import RemovingOutlier, OutlierProcessStrategy
 from src.outlier.missing_value_imputation import RemovingMissingValues, MissingValueStrategy
-from src.EDA.EDA_multivariate import EDAPreProcessing, EDA_Multivariate
+
 from src.feature_engg.feature_engg import FeatureEngineering, FeatureEngineeringConfig
 from src.config.configuration import ConfigurationManager
 
@@ -50,19 +51,16 @@ class DataProcessingPipeline:
         logging.info(">>>>>Feature Engg. Started...<<<<<")
         fe_strategy = FeatureEngineering(data=cleaned_data, strategy=FeatureEngineeringConfig())
         fe = fe_strategy.handle_FE()
-        logging.info(">>>>>Feature Engg. Completed<<<<<\n")
-
-        logging.info(">>>>Multivariate EDA  Started<<<<<")
-        multivariate_df = EDAPreProcessing(data=fe, strategy=EDA_Multivariate())
-        variate_df = multivariate_df.handle_EDA() 
+        logging.info(">>>>>Feature Engg. Completed<<<<<\n") 
 
         logging.info(">>>>>Outlier Removing Started<<<<<")
-        outlier_df = variate_df.drop_duplicates()
-        outlier_removed = RemovingOutlier(data=outlier_df, strategy=OutlierProcessStrategy())
+        outlier_strategy = RemovingOutlier(data=fe, strategy=OutlierProcessStrategy())
+        outlier = outlier_strategy.handle_outlier()
+        
 
         logging.info(">>>>>Missing Value Imputation Started<<<<<")
-        imputed_df = outlier_removed
-        final_df = RemovingMissingValues(data=imputed_df, strategy=MissingValueStrategy())
+        missing_strategy = RemovingMissingValues(data=outlier, strategy=MissingValueStrategy())
+        final_df = missing_strategy.handle_missing_values()
 
         return final_df
 

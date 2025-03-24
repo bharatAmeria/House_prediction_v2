@@ -32,7 +32,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
         """
         try:
             config_ = config.get_data_cleaning_config()
-            df = data.copy()
+            df = data
             # Extract Super Built-up area and convert to sqft if needed
             df['super_built_up_area'] = df['areaWithType'].apply(self.get_super_built_up_area)
             df['super_built_up_area'] = df.apply(
@@ -93,8 +93,10 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             for furnishing in columns_to_include:
                 df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
 
+                
             # Create the new dataframe with the required columns
             furnishings_df = df[['furnishDetails'] + columns_to_include]
+            furnishings_df = furnishings_df.copy()
             furnishings_df.drop(columns=['furnishDetails'], inplace=True)
 
             scaler = StandardScaler()
@@ -178,7 +180,8 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             # cols to drop -> nearbyLocations,furnishDetails, features,features_list, additionalRoom
             df.drop(columns=['nearbyLocations', 'furnishDetails', 'features', 'features_list', 'additionalRoom'],
                       inplace=True)
-
+            
+            print(df.info())
             return data
         except Exception as e:
             logging.error(e)

@@ -67,7 +67,7 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
         try:
             logging.info("Starting house data Pre-Processing...")
             
-            data = data.copy()
+            data = data
             # Removing duplicate rows
             data.drop_duplicates(inplace=True)
 

@@ -28,7 +28,7 @@ class DataPreprocessStrategy(DataStrategy):
         and converts the data type to float.
         """
         try:
-            df = data.copy()
+            df = data
             df.insert(loc=3, column='sector',
                         value=df['property_name'].str.split('in').str.get(1).str.replace('Gurgaon', '').str.strip())
             df['sector'] = df['sector'].str.lower()
@@ -132,7 +132,9 @@ class DataPreprocessStrategy(DataStrategy):
 
             df.drop(columns=['property_name', 'address', 'description', 'rating'], inplace=True)
 
-            return data
+            print(df.info())
+
+            return df
 
         except Exception as e:
             logging.error("Error occurred in Processing data", exc_info=True)

@@ -54,7 +54,7 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
         try:
             logging.info("Starting flats data Pre-Processing...")
 
-            data = data.copy()
+            data = data
 
             # Dropping unnecessary columns
             data.drop(columns=['link', 'property_id'], inplace=True)

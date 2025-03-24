@@ -54,6 +54,7 @@ class OutlierProcessStrategy(OutlierStrategy):
             min_room_area = (x['area'] / x['bedRoom']).quantile(0.02)
             df = df[(df['area'] / df['bedRoom']) >= min_room_area]
             
+            print(df.info())
             return df
         
         except Exception as e:

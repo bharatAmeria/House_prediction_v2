@@ -6,6 +6,7 @@ from typing import Union
 from abc import ABC, abstractmethod
 from src.logger import logging
 from src.exception import MyException
+from pathlib import Path
 
 class MissingValueImputationStrategy(ABC):
     """
@@ -21,7 +22,7 @@ class MissingValueStrategy(MissingValueImputationStrategy):
     """
     def handle_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
-            df = data.copy()
+            df = data
 
             # both present built up null
             sbc_df = df[~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
@@ -45,8 +46,7 @@ class MissingValueStrategy(MissingValueImputationStrategy):
             df.drop(columns=['area',
                              'areaWithType',
                              'super_built_up_area',
-                             'carpet_area',
-                             'area_room_ratio'],inplace=True)
+                             'carpet_area'],inplace=True)
             
             # Floor Num
             df['floorNum'].fillna(2.0,inplace=True)
@@ -55,11 +55,13 @@ class MissingValueStrategy(MissingValueImputationStrategy):
 
             # Age Possession
             df[df['agePossession'] == 'Undefined']
-            df['agePossession'] = df.apply(self.mode_based_imputation, axis=1)
-            df['agePossession'] = df.apply(self.mode_based_imputation2,axis=1)
-            df['agePossession'] = df.apply(self.mode_based_imputation3,axis=1)
+            df['agePossession'] = df.apply(lambda row: self.mode_based_imputation(row, df), axis=1)
+            df['agePossession'] = df.apply(lambda row: self.mode_based_imputation2(row, df), axis=1)
+            df['agePossession'] = df.apply(lambda row: self.mode_based_imputation3(row, df), axis=1)
+            
+            print(df.info())
+            return
 
-            return data
         except Exception as e:
               logging.error("Error occurred in Imputing missing values", exc_info=True)
               raise MyException(e, sys)
@@ -114,8 +116,8 @@ class MissingValueStrategy(MissingValueImputationStrategy):
 class RemovingMissingValues:
 
     def __init__(self, data: pd.DataFrame, strategy: MissingValueImputationStrategy) -> None:
-        self.values_imputed = data
+        self.df = data
         self.strategy = strategy
 
-    def handle_outlier(self) -> Union[pd.DataFrame, pd.Series]:
-        return self.strategy.handle_outlier(self.values_imputed)
+    def handle_missing_values(self) -> Union[pd.DataFrame, pd.Series]:
+        return self.strategy.handle_missing_values(self.df)
