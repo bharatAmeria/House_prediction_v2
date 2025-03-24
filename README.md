@@ -49,7 +49,7 @@ under the remaining 600 societies
     - Box Plot: The box plot showcases the spread of the data and potential outliers. Properties priced above approximately 10 crores might be considered outliers as they lie beyond the upper whisker of the box plot.
 
 - Missing Values: There are 17 
-![Alt Text](artifacts/image/price.png) ![Alt Text](artifacts/image/price2.png)
+![Alt Text](image/price.png) ![Alt Text](image/price2.png)
 
 **Skewness**: The price distribution has a skewness of approximately 3.28, indicating a positive skew. This means that the distribution tail is skewed to the right, which aligns with our observation from the histogram where most properties have prices on the lower end with a few high-priced properties.
 
@@ -67,20 +67,20 @@ Outliers Analysis (using IQR method):
     - The range for these outliers is from 5.46 crores to 31.5 crores.
     - The majority of properties are priced in the "1-2 crores" and "2-3 crores" ranges.
     - There's a significant drop in the number of properties priced above "5 crores."'
-    ![Alt Text](artifacts/image/price3.png)
+    ![Alt Text](image/price3.png)
 
 
 np.log1p(x): This function computes the natural logarithm of 1+x. 
 It's designed to provide more accurate results for values of x that are very close to zero.
 
 Using np.log1p helps in transforming the price column while ensuring that any value (including zero, if present) is handled appropriately. When we need to reverse the transformation, we can use np.expm1 which computes e^x-1
-![Alt Text](artifacts/image/price4.png)
+![Alt Text](image/price4.png)
 
 ### Price per sqft.:- Most properties have a price_per_sqft ranging between approximately ₹0 and ₹40,000. There is a significant concentration in the lower range, with a few properties having exceptionally high price_per_sqft.
 
 The box plot clearly shows several outliers, especially on the higher side. The interquartile range (IQR) is relatively compact, but there are many data points beyond the "whiskers" of the box plot, indicating potential outliers
 
-![Alt Text](artifacts/image/price_per_sqft.png)    ![Alt Text](artifacts/image/price_per_sqft_boxPlot.png)
+![Alt Text](image/price_per_sqft.png)    ![Alt Text](image/price_per_sqft_boxPlot.png)
 
 #### Observations
     - Potential Outliers
