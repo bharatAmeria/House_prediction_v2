@@ -27,11 +27,8 @@ data_ingestion:
 
 data_cleaning:
   cleaned_data_dir: artifacts/cleaned_data
-  cleaned_gurgaon_data_path: artifacts/cleaned_data/gurgaon_data.pkl
-  cleaned_gurgaon_flats_data_path: artifacts/cleaned_data/gurgaon_flats_data.pkl
-  cleaned_gurgaon_appartments_data_path: artifacts/cleaned_data/gurgaon_appartments_data.pkl
-  cleaned_gurgaon_houses_data_path: artifacts/cleaned_data/house_cleaned.pkl
-
+  cleaned_gurgaon_data_path: artifacts/cleaned_data/gurgaon_data.csv
+  
   gurgaon_data_path: artifacts/data_ingestion/gurgaon_housing_datas/gurgaon_properties.csv
   gurgaon_flats_data_path: artifacts/data_ingestion/gurgaon_housing_data/flats.csv
   gurgaon_appartments_data_path: artifacts/data_ingestion/gurgaon_housing_data/appartments.csv

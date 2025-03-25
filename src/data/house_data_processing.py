@@ -67,29 +67,29 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
         try:
             logging.info("Starting house data Pre-Processing...")
             
-            data = data
+            df = data
             # Removing duplicate rows
-            data.drop_duplicates(inplace=True)
+            df.drop_duplicates(inplace=True)
 
             # Dropping unwanted columns
-            data.drop(columns=['link', 'property_id'], inplace=True, errors='ignore')
+            df.drop(columns=['link', 'property_id'], inplace=True, errors='ignore')
 
             # Renaming columns for clarity
-            data.rename(columns={'rate': 'price_per_sqft'}, inplace=True)
+            df.rename(columns={'rate': 'price_per_sqft'}, inplace=True)
 
             # Cleaning 'society' column by removing unwanted characters
-            data['society'] = data['society'].astype(str).apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', name).strip().lower())
-            data['society'] = data['society'].replace('nan', 'independent')
+            df['society'] = df['society'].astype(str).apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', name).strip().lower())
+            df['society'] = df['society'].replace('nan', 'independent')
 
             # Filtering out 'Price on Request' values
-            data = data[data['price'] != 'Price on Request']
+            df = df[df['price'] != 'Price on Request']
 
             # Processing price column by converting it into float
-            data['price'] = data['price'].str.split(' ').apply(self.treat_price)
+            df['price'] = df['price'].str.split(' ').apply(self.treat_price)
 
             # Cleaning 'price_per_sqft' column by removing currency symbols and commas
-            data['price_per_sqft'] = (
-                data['price_per_sqft']
+            df['price_per_sqft'] = (
+                df['price_per_sqft']
                 .str.split('/')
                 .str.get(0)
                 .str.replace('₹', '')
@@ -99,35 +99,35 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
             )
 
             # Cleaning 'bedRoom' column and converting it to integer
-            data = data[~data['bedRoom'].isnull()]
-            data['bedRoom'] = data['bedRoom'].str.split(' ').str.get(0).astype(int)
+            df = df[~df['bedRoom'].isnull()]
+            df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
 
             # Cleaning 'bathroom' column and converting it to integer
-            data['bathroom'] = data['bathroom'].str.split(' ').str.get(0).astype(int)
+            df['bathroom'] = df['bathroom'].str.split(' ').str.get(0).astype(int)
 
             # Cleaning 'balcony' column and handling missing values
-            data['balcony'] = data['balcony'].str.split(' ').str.get(0).str.replace('No', '0')
+            df['balcony'] = df['balcony'].str.split(' ').str.get(0).str.replace('No', '0')
 
             # Handling missing values in 'additionalRoom' column
-            data['additionalRoom'].fillna('not available', inplace=True)
-            data['additionalRoom'] = data['additionalRoom'].str.lower()
+            df['additionalRoom'].fillna('not available', inplace=True)
+            df['additionalRoom'] = df['additionalRoom'].str.lower()
 
             # Processing 'floorNum' column
-            data['noOfFloor'] = data['noOfFloor'].str.split(' ').str.get(0)
-            data.rename(columns={'noOfFloor': 'floorNum'}, inplace=True)
+            df['noOfFloor'] = df['noOfFloor'].str.split(' ').str.get(0)
+            df.rename(columns={'noOfFloor': 'floorNum'}, inplace=True)
 
             # Handling missing values in 'facing' column
-            data['facing'].fillna('NA', inplace=True)
+            df['facing'].fillna('NA', inplace=True)
 
             # Calculating the area based on price and price per square foot
-            data['area'] = round((data['price'] * 10000000) / data['price_per_sqft'])
+            df['area'] = round((df['price'] * 10000000) / df['price_per_sqft'])
 
             # Adding a new 'property_type' column
-            data.insert(loc=1, column='property_type', value='house')
+            df.insert(loc=1, column='property_type', value='house')
 
             logging.info("House data pre-processing completed successfully.\n")
             
-            return data
+            return df
         
         except Exception as e:
             logging.error("Error occurred in cleaning house data", exc_info=True)

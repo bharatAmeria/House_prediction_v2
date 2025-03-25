@@ -21,7 +21,7 @@ class OutlierProcessStrategy(OutlierStrategy):
     def handle_outlier(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
              
-            df = data.copy()
+            df = data
 
             outlier_price = self.detect_outliers_iqr(df, 'price')
             outlier_sqft = self.detect_outliers_iqr(df, 'area')
@@ -31,8 +31,6 @@ class OutlierProcessStrategy(OutlierStrategy):
             outlier_sqft['price_per_sqft'] = round((outlier_sqft['price'] * 10000000) / outlier_sqft['area'])
 
             df.update(outlier_sqft)
-            df = df[df['price_per_sqft'] <= 50000]
-            df = df[df['area'] < 100000]
             df.drop(index=[818, 1796, 1123, 2, 2356, 115, 3649, 2503, 1471], inplace=True, errors='ignore')
             
             df.loc[48, 'area'] = 115 * 9
@@ -44,8 +42,6 @@ class OutlierProcessStrategy(OutlierStrategy):
             df.loc[3088, 'area'] = 2160
             df.loc[3444, 'area'] = 1175
 
-            df = df[df['bedRoom'] <= 10]
-            df = df[df['bathroom'] <= 10]
 
             df.loc[2131, 'carpet_area'] = 1812
             df['price_per_sqft'] = round((df['price'] * 10000000) / df['area'])
@@ -54,7 +50,6 @@ class OutlierProcessStrategy(OutlierStrategy):
             min_room_area = (x['area'] / x['bedRoom']).quantile(0.02)
             df = df[(df['area'] / df['bedRoom']) >= min_room_area]
             
-            print(df.info())
             return df
         
         except Exception as e:

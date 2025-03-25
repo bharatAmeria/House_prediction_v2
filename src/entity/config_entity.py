@@ -26,7 +26,7 @@ class DataIngestionConfig:
 class DataCleaningConfig:
     cleaned_data_dir: Path
     cleaned_gurgaon_data: Path
-    cleaned_gurgaon_appartments_data: Path
+    # cleaned_gurgaon_appartments_data: Path
 
     gurgaon_data_path: Path
     gurgaon_flats_data: Path

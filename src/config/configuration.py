@@ -32,7 +32,6 @@ class ConfigurationManager:
         data_cleaning_config = DataCleaningConfig(
             cleaned_data_dir = config.cleaned_data_dir, 
             cleaned_gurgaon_data = config.cleaned_gurgaon_data_path,
-            cleaned_gurgaon_appartments_data = config.cleaned_gurgaon_appartments_data_path,
 
             gurgaon_data_path= config.gurgaon_houses_data_path,
             gurgaon_flats_data= config.gurgaon_flats_data_path,

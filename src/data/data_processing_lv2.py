@@ -31,8 +31,8 @@ class DataPreprocessStrategy(DataStrategy):
             df = data
             df.insert(loc=3, column='sector',
                         value=df['property_name'].str.split('in').str.get(1).str.replace('Gurgaon', '').str.strip())
+            
             df['sector'] = df['sector'].str.lower()
-            # data['society'] = data['society'].str.replace('nan', 'independent')
 
             df['sector'] = df['sector'].str.replace('dharam colony', 'sector 12')
             df['sector'] = df['sector'].str.replace('krishna colony', 'sector 7')
@@ -131,8 +131,6 @@ class DataPreprocessStrategy(DataStrategy):
             df.loc[[311, 1072, 1486, 3040, 3875], 'sector'] = 'sector 110'
 
             df.drop(columns=['property_name', 'address', 'description', 'rating'], inplace=True)
-
-            print(df.info())
 
             return df
 

@@ -23,6 +23,91 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
     This class provides various methods to preprocess and clean the dataset
     before further analysis or storage.
     """
+    
+
+    def handle_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Cleans and preprocesses the flats dataset.
+        This includes renaming columns, handling missing values, and cleaning text fields.
+        
+        Args:
+            data (pd.DataFrame): The input DataFrame containing raw flat data.
+        
+        Returns:
+            pd.DataFrame: The cleaned and preprocessed dataset.
+        """
+        try:
+            logging.info("Starting flats data Pre-Processing...")
+
+            df = data
+
+            # Dropping unnecessary columns
+            df.drop(columns=['link', 'property_id'], inplace=True)
+            
+            # Renaming columns for clarity
+            df.rename(columns={'area': 'price_per_sqft'}, inplace=True)
+            
+            # Cleaning 'society' column by removing rating stars and converting to lowercase
+            df['society'] = df['society'].apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', str(name)).strip()).str.lower()
+
+            # Filtering out 'Price on Request' values
+            df = df[df['price'] != 'Price on Request']
+            
+            # Processing price column
+            df['price'] = df['price'].str.split(' ').apply(self.treat_price)
+
+            # Processing 'price_per_sqft' column
+            df['price_per_sqft'] = (
+                df['price_per_sqft']
+                .str.split('/')
+                .str.get(0)
+                .str.replace('₹', '')
+                .str.replace(',', '')
+                .str.strip()
+                .astype(float)
+            )
+
+            # Cleaning 'bedRoom' column and converting to integer
+            df = df[~df['bedRoom'].isnull()]
+            df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
+
+            # Cleaning 'bathroom' column
+            df['bathroom'] = df['bathroom'].str.split(' ').str.get(0).astype(int)
+
+            # Cleaning 'balcony' column and replacing 'No' with '0'
+            df['balcony'] = df['balcony'].str.split(' ').str.get(0).str.replace('No', '0')
+
+            # Handling missing values for 'additionalRoom'
+            df['additionalRoom'].fillna('not available', inplace=True)
+            df['additionalRoom'] = df['additionalRoom'].str.lower()
+
+            # Processing 'floorNum' column
+            df['floorNum'] = (
+                df['floorNum']
+                .str.split(' ')
+                .str.get(0)
+                .replace('Ground', '0')
+                .str.replace('Basement', '-1')
+                .str.replace('Lower', '0')
+                .str.extract(r'(\d+)')
+            )
+
+            # Handling missing values for 'facing'
+            df['facing'].fillna('NA', inplace=True)
+
+            # Calculating area using price and price per square foot
+            df.insert(loc=4, column='area', value=round((df['price'] * 10000000) / df['price_per_sqft']))
+
+            # Adding property_type column
+            df.insert(loc=1, column='property_type', value='flat')
+
+            logging.info("Flats data pre-processing completed successfully.\n")
+            return df
+
+        except Exception as e:
+            logging.error("Error occurred in cleaning flats data", exc_info=True)
+            raise MyException(e, sys)
+        
     def treat_price(self, x):
         """
         Converts price values into float format.
@@ -39,89 +124,6 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
         if x[1] == 'Lac':
             return round(float(x[0]) / 100, 2)
         return round(float(x[0]), 2)
-
-    def handle_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Cleans and preprocesses the flats dataset.
-        This includes renaming columns, handling missing values, and cleaning text fields.
-        
-        Args:
-            data (pd.DataFrame): The input DataFrame containing raw flat data.
-        
-        Returns:
-            pd.DataFrame: The cleaned and preprocessed dataset.
-        """
-        try:
-            logging.info("Starting flats data Pre-Processing...")
-
-            data = data
-
-            # Dropping unnecessary columns
-            data.drop(columns=['link', 'property_id'], inplace=True)
-            
-            # Renaming columns for clarity
-            data.rename(columns={'area': 'price_per_sqft'}, inplace=True)
-            
-            # Cleaning 'society' column by removing rating stars and converting to lowercase
-            data['society'] = data['society'].apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', str(name)).strip()).str.lower()
-
-            # Filtering out 'Price on Request' values
-            data = data[data['price'] != 'Price on Request']
-            
-            # Processing price column
-            data['price'] = data['price'].str.split(' ').apply(self.treat_price)
-
-            # Processing 'price_per_sqft' column
-            data['price_per_sqft'] = (
-                data['price_per_sqft']
-                .str.split('/')
-                .str.get(0)
-                .str.replace('₹', '')
-                .str.replace(',', '')
-                .str.strip()
-                .astype(float)
-            )
-
-            # Cleaning 'bedRoom' column and converting to integer
-            data = data[~data['bedRoom'].isnull()]
-            data['bedRoom'] = data['bedRoom'].str.split(' ').str.get(0).astype(int)
-
-            # Cleaning 'bathroom' column
-            data['bathroom'] = data['bathroom'].str.split(' ').str.get(0).astype(int)
-
-            # Cleaning 'balcony' column and replacing 'No' with '0'
-            data['balcony'] = data['balcony'].str.split(' ').str.get(0).str.replace('No', '0')
-
-            # Handling missing values for 'additionalRoom'
-            data['additionalRoom'].fillna('not available', inplace=True)
-            data['additionalRoom'] = data['additionalRoom'].str.lower()
-
-            # Processing 'floorNum' column
-            data['floorNum'] = (
-                data['floorNum']
-                .str.split(' ')
-                .str.get(0)
-                .replace('Ground', '0')
-                .str.replace('Basement', '-1')
-                .str.replace('Lower', '0')
-                .str.extract(r'(\d+)')
-            )
-
-            # Handling missing values for 'facing'
-            data['facing'].fillna('NA', inplace=True)
-
-            # Calculating area using price and price per square foot
-            data.insert(loc=4, column='area', value=round((data['price'] * 10000000) / data['price_per_sqft']))
-
-            # Adding property_type column
-            data.insert(loc=1, column='property_type', value='flat')
-
-            logging.info("Flats data pre-processing completed successfully.\n")
-            return data
-
-        except Exception as e:
-            logging.error("Error occurred in cleaning flats data", exc_info=True)
-            raise MyException(e, sys)
 
 class FlatsDataCleaning(FlatsDataStrategy):
     """

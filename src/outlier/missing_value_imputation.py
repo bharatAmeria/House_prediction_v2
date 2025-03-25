@@ -24,19 +24,23 @@ class MissingValueStrategy(MissingValueImputationStrategy):
         try:
             df = data
 
+            all_present_df = df[~((df['super_built_up_area'].isnull()) | (df['built_up_area'].isnull()) | (df['carpet_area'].isnull()))]
+            super_to_built_up_ratio = (all_present_df['super_built_up_area']/all_present_df['built_up_area']).median()
+            carpet_to_built_up_ratio = (all_present_df['carpet_area']/all_present_df['built_up_area']).median()
+
             # both present built up null
             sbc_df = df[~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
-            sbc_df['built_up_area'].fillna(round(((sbc_df['super_built_up_area']/1.105) + (sbc_df['carpet_area']/0.9))/2),inplace=True)
+            sbc_df['built_up_area'].fillna(round(((sbc_df['super_built_up_area']/super_to_built_up_ratio) + (sbc_df['carpet_area']/carpet_to_built_up_ratio))/2),inplace=True)
             df.update(sbc_df)
 
             # sb present c is null built up null
             sb_df = df[~(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull())]
-            sb_df['built_up_area'].fillna(round(sb_df['super_built_up_area']/1.105),inplace=True)
+            sb_df['built_up_area'].fillna(round(sb_df['super_built_up_area']/super_to_built_up_ratio),inplace=True)
             df.update(sb_df)
 
             # sb null c is present built up null
             c_df = df[(df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & ~(df['carpet_area'].isnull())]
-            c_df['built_up_area'].fillna(round(c_df['carpet_area']/0.9),inplace=True)
+            c_df['built_up_area'].fillna(round(c_df['carpet_area']/carpet_to_built_up_ratio),inplace=True)
             df.update(c_df)
 
             anamoly_df = df[(df['built_up_area'] < 2000) & (df['price'] > 2.5)][['price','area','built_up_area']]
@@ -59,7 +63,6 @@ class MissingValueStrategy(MissingValueImputationStrategy):
             df['agePossession'] = df.apply(lambda row: self.mode_based_imputation2(row, df), axis=1)
             df['agePossession'] = df.apply(lambda row: self.mode_based_imputation3(row, df), axis=1)
             
-            print(df.info())
             return
 
         except Exception as e:

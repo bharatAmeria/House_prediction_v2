@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from sklearn.cluster import KMeans
 
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
-from src.constants import RANDOM_STATE, WCSS_REDUCED, N_CLUSTERS
+from src.constants import RANDOM_STATE, WCSS_REDUCED, N_CLUSTERS, WEIGHTS
 from src.logger import logging
 from src.exception import MyException
 from src.config.configuration import ConfigurationManager
@@ -33,6 +33,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
         try:
             config_ = config.get_data_cleaning_config()
             df = data
+            
             # Extract Super Built-up area and convert to sqft if needed
             df['super_built_up_area'] = df['areaWithType'].apply(self.get_super_built_up_area)
             df['super_built_up_area'] = df.apply(
@@ -47,23 +48,19 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             df['carpet_area'] = df['areaWithType'].apply(lambda x: self.get_area(x, 'Carpet area'))
             df['carpet_area'] = df.apply(lambda x: self.convert_to_sqft(x['areaWithType'], x['carpet_area']), axis=1)
 
-            df[['price', 'property_type', 'area', 'areaWithType', 'super_built_up_area', 'built_up_area',
-                'carpet_area']].sample(5)
-
-            all_nan_df = \
-                df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (
-                    df['carpet_area'].isnull()))][
-                    ['price', 'property_type', 'area', 'areaWithType', 'super_built_up_area', 'built_up_area',
-                     'carpet_area']]
+            all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (
+                    df['carpet_area'].isnull()))][['price',
+                                                    'property_type',
+                                                    'area', 
+                                                    'areaWithType', 
+                                                    'super_built_up_area', 
+                                                    'built_up_area',
+                                                    'carpet_area']]
 
             
             all_nan_df['built_up_area'] = all_nan_df['areaWithType'].apply(self.extract_plot_area)
 
-            
-
             all_nan_df['built_up_area'] = all_nan_df.apply(self.convert_scale, axis=1)
-
-            
 
             new_cols = ['study room', 'servant room', 'store room', 'pooja room', 'others']
 
@@ -75,33 +72,34 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
 
             df['agePossession'] = df['agePossession'].apply(self.categorize_age_possession)
 
-            # Extract all unique furnishings from the furnishDetails column
+            # Extract all unique furnishings
             all_furnishings = []
             for detail in df['furnishDetails'].dropna():
                 furnishings = detail.replace('[', '').replace(']', '').replace("'", "").split(', ')
                 all_furnishings.extend(furnishings)
-            unique_furnishings = list(set(all_furnishings))
 
-            
+            unique_furnishings = list(set(all_furnishings))
 
             # Simplify the furnishings list by removing "No" prefix and numbers
             columns_to_include = [re.sub(r'No |\d+', '', furnishing).strip() for furnishing in unique_furnishings]
             columns_to_include = list(set(columns_to_include))  # Get unique furnishings
             columns_to_include = [furnishing for furnishing in columns_to_include if furnishing]  # Remove empty strings
 
-            # Create new columns for each unique furnishing and populate with counts
-            for furnishing in columns_to_include:
-                df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
+            # Create new DataFrame for furnishings analysis
+            furnishings_df = df[['furnishDetails']].copy()
 
-                
-            # Create the new dataframe with the required columns
-            furnishings_df = df[['furnishDetails'] + columns_to_include]
-            furnishings_df = furnishings_df.copy()
+            # Add new columns based on extracted furnishings
+            for furnishing in columns_to_include:
+                furnishings_df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
+
+            # Drop the original furnishDetails column
             furnishings_df.drop(columns=['furnishDetails'], inplace=True)
 
+            # Scale the data
             scaler = StandardScaler()
             scaled_data = scaler.fit_transform(furnishings_df)
 
+            # Determine optimal clusters using Elbow method
             for i in range(1, 11):
                 kmeans = KMeans(n_clusters=i, init='k-means++', random_state=RANDOM_STATE)
                 kmeans.fit(scaled_data)
@@ -112,10 +110,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             kmeans.fit(scaled_data)
 
             # Predict the cluster assignments for each row
-            cluster_assignments = kmeans.predict(scaled_data)
-
-            df = df.iloc[:, :-18]
-            df['furnishing_type'] = cluster_assignments
+            df['furnishing_type'] = kmeans.predict(scaled_data)
 
             app_df = pd.read_csv(config_.gurgaon_appartments_data)
 
@@ -143,49 +138,42 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
                 kmeans.fit(features_binary_df)
                 wcss_reduced.append(kmeans.inertia_)
 
-            weights = {'24/7 Power Backup': 8, '24/7 Water Supply': 4, '24x7 Security': 7, 'ATM': 4,
-                       'Aerobics Centre': 6,
-                       'Airy Rooms': 8, 'Amphitheatre': 7, 'Badminton Court': 7, 'Banquet Hall': 8,
-                       'Bar/Chill-Out Lounge': 9,
-                       'Barbecue': 7, 'Basketball Court': 7, 'Billiards': 7, 'Bowling Alley': 8, 'Business Lounge': 9,
-                       'CCTV Camera Security': 8, 'Cafeteria': 6, 'Car Parking': 6, 'Card Room': 6,
-                       'Centrally Air Conditioned': 9, 'Changing Area': 6, "Children's Play Area": 7, 'Cigar Lounge': 9,
-                       'Clinic': 5, 'Club House': 9, 'Concierge Service': 9, 'Conference room': 8, 'Creche/Day care': 7,
-                       'Cricket Pitch': 7, 'Doctor on Call': 6, 'Earthquake Resistant': 5, 'Entrance Lobby': 7,
-                       'False Ceiling Lighting': 6, 'Feng Shui / Vaastu Compliant': 5, 'Fire Fighting Systems': 8,
-                       'Fitness Centre / GYM': 8, 'Flower Garden': 7, 'Food Court': 6, 'Foosball': 5, 'Football': 7,
-                       'Fountain': 7, 'Gated Community': 7, 'Golf Course': 10, 'Grocery Shop': 6, 'Gymnasium': 8,
-                       'High Ceiling Height': 8, 'High Speed Elevators': 8, 'Infinity Pool': 9, 'Intercom Facility': 7,
-                       'Internal Street Lights': 6, 'Internet/wi-fi connectivity': 7, 'Jacuzzi': 9, 'Jogging Track': 7,
-                       'Landscape Garden': 8, 'Laundry': 6, 'Lawn Tennis Court': 8, 'Library': 8, 'Lounge': 8,
-                       'Low Density Society': 7, 'Maintenance Staff': 6, 'Manicured Garden': 7, 'Medical Centre': 5,
-                       'Milk Booth': 4, 'Mini Theatre': 9, 'Multipurpose Court': 7, 'Multipurpose Hall': 7,
-                       'Natural Light': 8, 'Natural Pond': 7, 'Park': 8, 'Party Lawn': 8,
-                       'Piped Gas': 7, 'Pool Table': 7, 'Power Back up Lift': 8, 'Private Garden / Terrace': 9,
-                       'Property Staff': 7, 'RO System': 7, 'Rain Water Harvesting': 7, 'Reading Lounge': 8,
-                       'Restaurant': 8,
-                       'Salon': 8, 'Sauna': 9, 'Security / Fire Alarm': 9, 'Security Personnel': 9,
-                       'Separate entry for servant room': 8, 'Sewage Treatment Plant': 6, 'Shopping Centre': 7,
-                       'Skating Rink': 7, 'Solar Lighting': 6, 'Solar Water Heating': 7, 'Spa': 9,
-                       'Spacious Interiors': 9,
-                       'Squash Court': 8, 'Steam Room': 9, 'Sun Deck': 8,
-                       'Swimming Pool': 8, 'Temple': 5, 'Theatre': 9, 'Toddler Pool': 7, 'Valet Parking': 9,
-                       'Video Door Security': 9, 'Visitor Parking': 7, 'Water Softener Plant': 7, 'Water Storage': 7,
-                       'Water purifier': 7, 'Yoga/Meditation Area': 7
-                       }
+            
             # Calculate luxury score for each row
-            luxury_score = features_binary_df[list(weights.keys())].multiply(list(weights.values())).sum(axis=1)
+            luxury_score = features_binary_df[list(WEIGHTS.keys())].multiply(list(WEIGHTS.values())).sum(axis=1)
 
             df['luxury_score'] = luxury_score
             # cols to drop -> nearbyLocations,furnishDetails, features,features_list, additionalRoom
             df.drop(columns=['nearbyLocations', 'furnishDetails', 'features', 'features_list', 'additionalRoom'],
                       inplace=True)
             
-            print(df.info())
+            df = df[df['built_up_area'] != 737147]
+
+            # Group by 'sector' and calculate the average price
+            avg_price_per_sector = df.groupby('sector')['price'].mean().reset_index()
+            avg_price_per_sector['sector_number'] = avg_price_per_sector['sector'].apply(self.extract_sector_number)
+
+            avg_price_per_sqft_sector = df.groupby('sector')['price_per_sqft'].mean().reset_index()
+            avg_price_per_sqft_sector['sector_number'] = avg_price_per_sqft_sector['sector'].apply(self.extract_sector_number)
+
+            luxury_score = df.groupby('sector')['luxury_score'].mean().reset_index()
+            luxury_score['sector_number'] = luxury_score['sector'].apply(self.extract_sector_number)
+
+            df.to_csv(config_.cleaned_gurgaon_data, index=False)
+            
             return data
         except Exception as e:
             logging.error(e)
             raise e
+        
+    # Function to extract sector numbers
+    def extract_sector_number(self, sector_name):
+        match = re.search(r'\d+', sector_name)
+        if match:
+            return int(match.group())
+        else:
+            return float('inf')  # Return a large number for non-numbered sectors
+
         
     def convert_scale(self, row):
                 if np.isnan(row['area']) or np.isnan(row['built_up_area']):
