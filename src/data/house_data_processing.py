@@ -8,12 +8,6 @@ from src.logger import logging
 from src.exception import MyException
 from src.entity.config_entity import DataCleaningConfig
 
-class DataCleaningConfig:
-    """
-    Configuration class for data cleaning operations.
-    """
-    pass
-
 class HouseDataStrategy(ABC):
     """
     Abstract base class that defines a strategy for handling house data.

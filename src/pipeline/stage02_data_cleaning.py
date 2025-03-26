@@ -11,7 +11,6 @@ from src.data.flats_data_processing import FlatsDataCleaning, FlatsDataPreProces
 from src.outlier.outlier_treatment import RemovingOutlier, OutlierProcessStrategy
 from src.outlier.missing_value_imputation import RemovingMissingValues, MissingValueStrategy
 from src.feature_engg.feature_engg import FeatureEngineering, FeatureEngineeringConfig
-from src.feature_engg.feature_selection import FeatureSelection, FeatureSelectionConfig
 from src.config.configuration import ConfigurationManager
 
 class DataProcessingPipeline:
@@ -25,12 +24,12 @@ class DataProcessingPipeline:
 
         logging.info(">>>>>Housing Data Preprocessing Started<<<<<")
         house_data = pd.read_csv(data_cleaning_config.gurgaon_houses_data)
-        house_data_cleaning = HouseDataCleaning(data=house_data, strategy=HouseDataPreProcessingStrategy(), config=data_cleaning_config) # completed with no error
+        house_data_cleaning = HouseDataCleaning(data=house_data, strategy=HouseDataPreProcessingStrategy(), config=data_cleaning_config)
         house_cleaned_data = house_data_cleaning.handle_data()
 
         logging.info(">>>>>Flats Data Preprocessing Started...<<<<<")
         flats_data = pd.read_csv(data_cleaning_config.gurgaon_flats_data)
-        flats_data_cleaning = FlatsDataCleaning(data=flats_data, strategy=FlatsDataPreProcessingStrategy(), config=data_cleaning_config) # completed with no error
+        flats_data_cleaning = FlatsDataCleaning(data=flats_data, strategy=FlatsDataPreProcessingStrategy(), config=data_cleaning_config) 
         flats_cleaned_data = flats_data_cleaning.handle_data()
         logging.info(">>>>>Flats Data Preprocessing Completed<<<<<\n")
 
@@ -60,15 +59,8 @@ class DataProcessingPipeline:
         missing_imputed_df = missing_strategy.handle_missing_values()
         logging.info(">>>>>Missing Value Imputation Completed<<<<<\n")
 
-        # logging.info(">>>>>Feature Selection Started...<<<<<")
-        # feature_selection_strategy = FeatureSelection(data=missing_imputed_df, strategy=FeatureSelectionConfig())
-        # final_df = feature_selection_strategy.handle_FS()
-        # logging.info(">>>>>Feature Selection Completed<<<<<\n")
-        print(type(missing_imputed_df))
 
-        # missing_imputed_df.to_csv(data_cleaning_config.cleaned_gurgaon_data,index=False)
-
-        return 
+        return missing_imputed_df
 
 
 if __name__ == '__main__':

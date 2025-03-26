@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from typing import Union
 from abc import ABC, abstractmethod
+from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
@@ -12,6 +13,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import RFE
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
+from src.config.configuration import ConfigurationManager
+from src.constants import *
+from src.entity.config_entity import DataCleaningConfig
 from src.logger import logging
 from src.exception import MyException
 
@@ -35,10 +39,14 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
         try:
             df = data
 
-            # df.drop(columns=['society','price_per_sqft'])
-            # df['luxury_category'] = df['luxury_score'].apply(self.categorize_luxury)
-            # df['floor_category'] = df['floorNum'].apply(self.categorize_floor)
-            # df.drop(columns=['floorNum','luxury_score'],inplace=True)
+            df = df.drop(columns=COLUMNS_TO_DROP)
+            df['luxury_category'] = df['luxury_score'].apply(self.categorize_luxury)
+            df['floor_category'] = df['floorNum'].apply(self.categorize_floor)
+            df.drop(columns=['floorNum','luxury_score'],inplace=True)
+
+            num_imputer = SimpleImputer(strategy="median")  # or "mean"
+            num_cols = ["built_up_area"]
+            df[num_cols] = num_imputer.fit_transform(df[num_cols])
 
             # Create a copy of the original data for label encoding
             data_label_encoded = df
@@ -52,14 +60,16 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
 
             # Splitting the dataset into training and testing sets
             X_label = data_label_encoded.drop('price', axis=1)
+
             y_label = data_label_encoded['price']
+            y_label = num_imputer.fit_transform(y_label.values.reshape(-1, 1)).ravel()
 
             logging.info("Technique 1 - Correlation Analysis")
             fi_df1 = data_label_encoded.corr()['price'].iloc[1:].to_frame().reset_index().rename(columns={'index':'feature','price':'corr_coeff'})
 
             logging.info("Technique 2 - Random Forest Feature Importance")
             # Train a Random Forest regressor on label encoded data
-            rf_label = RandomForestRegressor(n_estimators=100, random_state=42)
+            rf_label = RandomForestRegressor(n_estimators=100, random_state=RANDOM_STATE)
             rf_label.fit(X_label, y_label)
 
             # Extract feature importance scores for label encoded data
@@ -80,14 +90,14 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             }).sort_values(by='gb_importance', ascending=False)
 
             logging.info("Technique 4 - Permutation Importance")
-            X_train_label, X_test_label, y_train_label, y_test_label = train_test_split(X_label, y_label, test_size=0.2, random_state=42)
+            X_train_label, X_test_label, y_train_label, y_test_label = train_test_split(X_label, y_label, test_size=TEST_SIZE, random_state=RANDOM_STATE)
 
             # Train a Random Forest regressor on label encoded data
-            rf_label = RandomForestRegressor(n_estimators=100, random_state=42)
+            rf_label = RandomForestRegressor(n_estimators=100, random_state=RANDOM_STATE)
             rf_label.fit(X_train_label, y_train_label)
 
             # Calculate Permutation Importance
-            perm_importance = permutation_importance(rf_label, X_test_label, y_test_label, n_repeats=30, random_state=42)
+            perm_importance = permutation_importance(rf_label, X_test_label, y_test_label, n_repeats=30, random_state=RANDOM_STATE)
 
             # Organize results into a DataFrame
             fi_df4 = pd.DataFrame({
@@ -102,18 +112,16 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
 
             # Train a LASSO regression model
             # We'll use a relatively small value for alpha (the regularization strength) for demonstration purposes
-            lasso = Lasso(alpha=0.01, random_state=42)
+            lasso = Lasso(alpha=ALPHA, random_state=RANDOM_STATE)
             lasso.fit(X_scaled, y_label)
 
             # Extract coefficients
             fi_df5 = pd.DataFrame({'feature': X_label.columns,'lasso_coeff': lasso.coef_}).sort_values(by='lasso_coeff', ascending=False)
 
             logging.info("Technique 6 - RFE")
-            # Initialize the base estimator
-            estimator = RandomForestRegressor()
-
+            
             # Apply RFE on the label-encoded and standardized training data
-            selector_label = RFE(estimator, n_features_to_select=X_label.shape[1], step=1)
+            selector_label = RFE(ESTIMATOR, n_features_to_select=X_label.shape[1], step=1)
             selector_label = selector_label.fit(X_label, y_label)
 
             # Get the selected features based on RFE
@@ -165,8 +173,12 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             rf = RandomForestRegressor(n_estimators=100, random_state=42)
             scores2 = cross_val_score(rf, X_label.drop(columns=['pooja room', 'study room', 'others']), y_label, cv=5, scoring='r2')
 
+            logging.info(f"scores1: {scores1}")
+            logging.info(f"scores2: {scores2}")
+            logging.info(f"Final Feature Importance: {final_fi_df}")
             export_df = X_label.drop(columns=['pooja room', 'study room', 'others'])
             export_df['price'] = y_label
+            
 
         except MyException as e:
             logging.error(e)
@@ -197,7 +209,8 @@ class FeatureSelection(FeatureSelectionStrategy):
     Feature engineering class which preprocesses the data and divides it into train and test data.
     """
 
-    def __init__(self, data: pd.DataFrame, strategy: FeatureSelectionStrategy) -> None:
+    def __init__(self, data: pd.DataFrame, strategy: FeatureSelectionStrategy, config: DataCleaningConfig) -> None:
+        self.config = config
         self.df = data
         self.strategy = strategy
 

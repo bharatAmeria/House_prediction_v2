@@ -29,8 +29,8 @@ class FlatsDataPreProcessingStrategy(DataVisualizationStrategy):
             group_df = new_df.groupby('sector').mean()[['price','price_per_sqft','built_up_area','latitude','longitude']]
 
             new_df.to_csv('data_viz1.csv',index=False)
-
-# word cloud
+            
+            # word cloud
             df1 = pd.read_csv('gurgaon_properties.csv')
             wordcloud_df = df1.merge(df, left_index=True, right_index=True)[['features','sector']]
 

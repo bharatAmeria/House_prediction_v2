@@ -4,7 +4,7 @@ from src.exception import MyException
 from src.constants import *
 from src.pipeline.stage01_data_ingestion import DataIngestionTrainingPipeline
 from src.pipeline.stage02_data_cleaning import DataProcessingPipeline
-
+from src.pipeline.stage03_feature_selection import FeatureSelectionPipeline
 
 try:
     logging.info(f">>>>>> stage {INGESTION_STAGE_NAME} started <<<<<<")
@@ -20,6 +20,15 @@ try:
     data_processing= DataProcessingPipeline()
     data_processing.main()
     logging.info(f">>>>>> stage {PRE_PROCESSING_STAGE_NAME} completed <<<<<<\n\nx==========x")
+except MyException as e:
+    logging.exception(e, sys)
+    raise e
+
+try:
+    logging.info(f">>>>>> stage {FEATURE_SELECTION_STAGE} started <<<<<<")
+    selection = FeatureSelectionPipeline()
+    selection.main()
+    logging.info(f">>>>>> stage {FEATURE_SELECTION_STAGE} completed <<<<<<\n\nx==========x")
 except MyException as e:
     logging.exception(e, sys)
     raise e

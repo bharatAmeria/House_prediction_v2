@@ -77,6 +77,17 @@ WEIGHTS = {'24/7 Power Backup': 8, '24/7 Water Supply': 4, '24x7 Security': 7, '
 
 """
 ---------------------------------------------------------------
+FEATURE Selection related constant 
+---------------------------------------------------------------
+"""
+FEATURE_SELECTION_STAGE = "Feature Selection"
+
+COLUMNS_TO_DROP = ['society', 'price_per_sqft', 'area', 'super_built_up_area', 'areaWithType', 'facing', 'carpet_area']
+ESTIMATOR = RandomForestRegressor()
+TEST_SIZE=0.2
+ALPHA=0.01
+"""
+---------------------------------------------------------------
 Model Selection related constant 
 ---------------------------------------------------------------
 """
