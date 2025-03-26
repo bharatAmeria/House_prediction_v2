@@ -82,7 +82,7 @@ FEATURE Selection related constant
 """
 FEATURE_SELECTION_STAGE = "Feature Selection"
 
-COLUMNS_TO_DROP = ['society', 'price_per_sqft', 'area', 'super_built_up_area', 'areaWithType', 'facing', 'carpet_area']
+COLUMNS_TO_DROP = ['society', 'price_per_sqft']
 ESTIMATOR = RandomForestRegressor()
 TEST_SIZE=0.2
 ALPHA=0.01

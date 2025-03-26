@@ -3,7 +3,9 @@ import pandas as pd
 import numpy as np
 
 from typing import Union
+from src.constants import *
 from abc import ABC, abstractmethod
+from src.config.configuration import ConfigurationManager
 from src.logger import logging
 from src.exception import MyException
 from pathlib import Path
@@ -20,9 +22,10 @@ class MissingValueStrategy(MissingValueImputationStrategy):
     """
     Fixing Missing Values
     """
-    def handle_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
+    def handle_missing_values(self, data: pd.DataFrame, config=ConfigurationManager()) -> pd.DataFrame:
         try:
             df = data
+            config_ = config.get_data_cleaning_config()
 
             all_present_df = df[~((df['super_built_up_area'].isnull()) | (df['built_up_area'].isnull()) | (df['carpet_area'].isnull()))]
             super_to_built_up_ratio = (all_present_df['super_built_up_area']/all_present_df['built_up_area']).median()
@@ -62,7 +65,8 @@ class MissingValueStrategy(MissingValueImputationStrategy):
             df['agePossession'] = df.apply(lambda row: self.mode_based_imputation(row, df), axis=1)
             df['agePossession'] = df.apply(lambda row: self.mode_based_imputation2(row, df), axis=1)
             df['agePossession'] = df.apply(lambda row: self.mode_based_imputation3(row, df), axis=1)
-            
+
+            df.to_csv(config_.missing_value_imputed, index=False)
             return
 
         except Exception as e:

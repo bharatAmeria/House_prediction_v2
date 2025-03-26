@@ -32,7 +32,7 @@ class ConfigurationManager:
         data_cleaning_config = DataCleaningConfig(
             cleaned_data_dir = config.cleaned_data_dir, 
             cleaned_gurgaon_data = config.cleaned_gurgaon_data_path,
-
+            missing_value_imputed = config.missing_value_imputed,
             gurgaon_data_path= config.gurgaon_houses_data_path,
             gurgaon_flats_data= config.gurgaon_flats_data_path,
             gurgaon_appartments_data = config.gurgaon_appartments_data_path,
@@ -40,6 +40,22 @@ class ConfigurationManager:
         )
 
         return data_cleaning_config
+    
+    def get_data_visualization_config(self) -> DataVisualizationConfig:
+        config = self.config.data_visualization
+
+        create_directories([config.viz_dir])
+
+        data_viz_config = DataVisualizationConfig(
+            viz_dir = config.viz_dir,
+            feature_text = config.feature_text,
+            missing_value_imputed = config.missing_value_imputed,
+            latlong = config.latlong_data,
+            data_viz = config.data_viz,
+            gurgaon_properties = config.gurgaon_properties,
+        )
+
+        return data_viz_config
 
     # def get_data_transformation_config(self) -> DataTransformationConfig:
     #     config = self.config.data_transformation

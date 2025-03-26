@@ -1,10 +1,11 @@
 import sys
+from src.constants import *
 from src.logger import logging
 from src.exception import MyException
-from src.constants import *
 from src.pipeline.stage01_data_ingestion import DataIngestionTrainingPipeline
 from src.pipeline.stage02_data_cleaning import DataProcessingPipeline
 from src.pipeline.stage03_feature_selection import FeatureSelectionPipeline
+from src.pipeline.stage04_data_visualiztion import DataVizPipeline
 
 try:
     logging.info(f">>>>>> stage {INGESTION_STAGE_NAME} started <<<<<<")
@@ -32,6 +33,16 @@ try:
 except MyException as e:
     logging.exception(e, sys)
     raise e
+
+try:
+    logging.info(f">>>>>> stage {FEATURE_SELECTION_STAGE} started <<<<<<")
+    selection = DataVizPipeline()
+    selection.main()
+    logging.info(f">>>>>> stage {FEATURE_SELECTION_STAGE} completed <<<<<<\n\nx==========x")
+except MyException as e:
+    logging.exception(e, sys)
+    raise e
+
 
 try:
     logging.info(f"*******************")

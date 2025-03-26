@@ -15,26 +15,29 @@ artifacts_root: artifacts
 
 data_ingestion:
   root_dir: artifacts/data
-  source_URL: https://drive.google.com/file/d/1ixu1NshIjq9oc_pankfoiCuFNA8aLxSA/view?usp=sharing
+  source_URL: https://drive.google.com/file/d/1fOCZ4t0t4lyXzn39vAEXTKSKaNTJs9Rl/view?usp=sharing
   local_data_file: artifacts/data/data.zip
-  unzip_dir: artifacts/data_ingestion
-  gurgaon_data_path: artifacts/data_ingestion/gurgaon_properties/gurgaon_properties.csv
-  gurgaon_flats_data_path: artifacts/data_ingestion/gurgaon_properties/flats.csv
-  gurgaon_appartments_data_path: artifacts/data_ingestion/gurgaon_properties/appartments.csv
-  gurgaon_houses_data_path: artifacts/data_ingestion/gurgaon_properties/houses.csv
-
-
+  unzip_dir: artifacts
+  gurgaon_flats_data_path: artifacts/gurgaon_data/flats.csv
+  gurgaon_appartments_data_path: artifacts/gurgaon_data/appartments.csv
+  gurgaon_houses_data_path: artifacts/gurgaon_data/houses.csv
 
 data_cleaning:
   cleaned_data_dir: artifacts/cleaned_data
   cleaned_gurgaon_data_path: artifacts/cleaned_data/gurgaon_data.csv
-  
-  gurgaon_data_path: artifacts/data_ingestion/gurgaon_housing_datas/gurgaon_properties.csv
-  gurgaon_flats_data_path: artifacts/data_ingestion/gurgaon_housing_data/flats.csv
-  gurgaon_appartments_data_path: artifacts/data_ingestion/gurgaon_housing_data/appartments.csv
-  gurgaon_houses_data_path: artifacts/data_ingestion/gurgaon_housing_data/houses.csv
+  missing_value_imputed: artifacts/cleaned_data/missing_value_imputed.csv
+  gurgaon_data_path: artifacts/gurgaon_data/gurgaon_properties.csv
+  gurgaon_flats_data_path: artifacts/gurgaon_data/flats.csv
+  gurgaon_appartments_data_path: artifacts/gurgaon_data/appartments.csv
+  gurgaon_houses_data_path: artifacts/gurgaon_data/houses.csv
 
-
+data_visualization:
+  viz_dir: artifacts/model
+  feature_text: artifacts/model/feature_text.pkl
+  data_viz: artifacts/model/data_viz1.csv
+  missing_value_imputed: artifacts/cleaned_data/missing_value_imputed.csv
+  latlong_data: artifacts/gurgaon_data/latlong.csv
+  gurgaon_properties: artifacts/gurgaon_data/gurgaon_properties.csv
 
 data_divider:
   root_dir: artifacts/data_divider

@@ -15,7 +15,7 @@ class FeatureSelectionPipeline:
         config = ConfigurationManager()
         data_cleaning_config = config.get_data_cleaning_config()
 
-        cleaned_data = pd.read_csv(data_cleaning_config.cleaned_gurgaon_data)
+        cleaned_data = pd.read_csv(data_cleaning_config.missing_value_imputed)
 
         logging.info(">>>>>Feature Selection Started...<<<<<")
         feature_selection_strategy = FeatureSelection(data=cleaned_data, strategy=FeatureSelectionConfig(), config=data_cleaning_config)

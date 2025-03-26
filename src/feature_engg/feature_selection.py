@@ -40,6 +40,7 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             df = data
 
             df = df.drop(columns=COLUMNS_TO_DROP)
+            
             df['luxury_category'] = df['luxury_score'].apply(self.categorize_luxury)
             df['floor_category'] = df['floorNum'].apply(self.categorize_floor)
             df.drop(columns=['floorNum','luxury_score'],inplace=True)

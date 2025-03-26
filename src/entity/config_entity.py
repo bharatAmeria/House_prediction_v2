@@ -26,12 +26,22 @@ class DataIngestionConfig:
 class DataCleaningConfig:
     cleaned_data_dir: Path
     cleaned_gurgaon_data: Path
+    missing_value_imputed: Path
     # cleaned_gurgaon_appartments_data: Path
 
     gurgaon_data_path: Path
     gurgaon_flats_data: Path
     gurgaon_appartments_data: Path
     gurgaon_houses_data: Path
+
+@dataclass
+class DataVisualizationConfig:
+    viz_dir: Path
+    feature_text: Path
+    data_viz: Path
+    latlong: Path
+    missing_value_imputed: Path
+    gurgaon_properties: Path
 
 
 
