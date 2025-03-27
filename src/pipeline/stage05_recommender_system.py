@@ -11,12 +11,12 @@ class RecoomendationSystemPipeline:
 
     @staticmethod
     def main():
-        # config = ConfigurationManager()
-        # get_recommend_config = config.get_recommend_sys_config()
-        data = pd.read_csv("artifacts/gurgaon_data/appartments.csv")
+        config = ConfigurationManager()
+        get_recommend_config = config.get_recommend_sys_config()
+        data = pd.read_csv(get_recommend_config.appartments_path)
 
         logging.info(">>>>>Recommender System  Started...<<<<<")
-        data_viz_strategy = RecommenderSystem(data=data, strategy=RecommenderSystemConfig())
+        data_viz_strategy = RecommenderSystem(data=data, strategy=RecommenderSystemConfig(), config=get_recommend_config)
 
         reommend = data_viz_strategy.handle_recommend()
         logging.info(">>>>>Recommender System Completed<<<<<\n")

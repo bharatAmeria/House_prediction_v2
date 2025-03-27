@@ -10,7 +10,7 @@ import pandas as pd
 from sklearn.discriminant_analysis import StandardScaler
 
 from src.config.configuration import ConfigurationManager
-# from src.entity.config_entity import RecommendSysConfig
+from src.entity.config_entity import RecommendSysConfig
 from src.logger import logging
 from src.exception import MyException
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -30,13 +30,13 @@ class RecommenderSystemConfig(RecommendStrategy):
     """
     Data preprocessing strategy which preprocesses the data.
     """
-    def handle_recommend(self, data: pd.DataFrame) -> pd.DataFrame:
+    def handle_recommend(self, data: pd.DataFrame, config=ConfigurationManager()) -> pd.DataFrame:
         """
         Removes columns which are not required, fills missing values with median average values,
         and converts the data type to float.
         """
         try:
-            # config = config.get_recoomend_sys_config()
+            config = config.get_recommend_sys_config()
 
             df = data
             
@@ -53,7 +53,7 @@ class RecommenderSystemConfig(RecommendStrategy):
             tfidf_matrix.toarray()[0]
 
             self.cosine_sim1 = cosine_similarity(tfidf_matrix, tfidf_matrix)
-            pickle.dump(self.cosine_sim1, open("artifacts/model/cosine_sim1.pkl", 'wb'))
+            pickle.dump(self.cosine_sim1, open(config.cosine1, 'wb'))
             df[['PropertyName','PriceDetails']]['PriceDetails'][1]
 
             # Apply the refined parsing and generate the new DataFrame structure
@@ -89,7 +89,7 @@ class RecommenderSystemConfig(RecommendStrategy):
 
             # Compute the cosine similarity matrix
             self.cosine_sim2 = cosine_similarity(self.ohe_df_normalized)
-            pickle.dump(self.cosine_sim2, open("artifacts/model/cosine_sim2.pkl", 'wb'))
+            # pickle.dump(self.cosine_sim2, open(config.cosine2, 'wb'))
 
             # Extract distances for each location
             location_matrix = {}
@@ -106,7 +106,7 @@ class RecommenderSystemConfig(RecommendStrategy):
             # Apply the scaler to the entire dataframe
             self.location_df_normalized = pd.DataFrame(scaler.fit_transform(location_df), columns=location_df.columns, index=location_df.index)
             self.cosine_sim3 = cosine_similarity(self.location_df_normalized)
-            pickle.dump(self.cosine_sim3, open("artifacts/model/cosine_sim3.pkl", 'wb'))
+            # pickle.dump(self.cosine_sim3, open(config.cosine3, 'wb'))
 
         except MyException as e:
             logging.error("Error occurred in Data Visulaization", exc_info=True)
@@ -250,8 +250,9 @@ class RecommenderSystem(RecommendStrategy):
     """
     Data cleaning class which preprocesses the data
     """
-    def __init__(self, data: pd.DataFrame, strategy: RecommendStrategy) -> None:
+    def __init__(self, data: pd.DataFrame, strategy: RecommendStrategy, config=RecommendSysConfig) -> None:
         """Initializes the DataCleaning class with a specific strategy."""
+        self.config = config
         self.df = data
         self.strategy = strategy
 

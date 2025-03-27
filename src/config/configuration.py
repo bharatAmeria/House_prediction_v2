@@ -57,20 +57,20 @@ class ConfigurationManager:
 
         return data_viz_config
     
-    # def get_recommend_sys_config(self) -> DataVisualizationConfig:
-    #     config = self.config.recommend_sys
+    def get_recommend_sys_config(self) -> RecommendSysConfig:
+        config = self.config.recommend_sys
 
-    #     create_directories([config.recommend_dir])
+        create_directories([config.recommend_dir])
 
-    #     recommend_sys_config = RecommendSysConfig(
-    #         recommend_dir = config.recommend_dir,    
-    #         appartments_path = config.appartments_path,
-    #         cosine1 = config.cosine_sim1,
-    #         cosine2 = config.cosine_sim2,
-    #         cosine3 = config.cosine_sim3,
-    #     )
+        recommend_sys_config = RecommendSysConfig(
+            recommend_dir = config.recommend_dir,    
+            appartments_path = config.appartments_path,
+            cosine1 = config.cosine1,
+            cosine2 = config.cosine2,
+            cosine3 = config.cosine3,
+        )
 
-    #     return recommend_sys_config
+        return recommend_sys_config
     
 
 
