@@ -182,7 +182,6 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             
 
         except MyException as e:
-            logging.error(e)
             raise e
         
     def categorize_luxury(self, score):

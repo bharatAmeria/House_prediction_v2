@@ -39,6 +39,13 @@ data_visualization:
   latlong_data: artifacts/gurgaon_data/latlong.csv
   gurgaon_properties: artifacts/gurgaon_data/gurgaon_properties.csv
 
+# recommend_sys:
+#   recommend_dir: artifacts/model
+#   coisne1: artifacts/model/cosine_sim1
+#   coisne2: artifacts/model/cosine_sim2
+#   coisne3: artifacts/model/cosine_sim3
+#   appartments-path: artifacts/gurgaon_data/appartments.csv
+
 data_divider:
   root_dir: artifacts/data_divider
   train_dir: artifacts/data_divider/train.csv

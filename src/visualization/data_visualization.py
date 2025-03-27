@@ -39,7 +39,7 @@ class Datavisualization(DataVisualizationStrategy):
                 main.extend(item)
 
             feature_text = ' '.join(main)
-            pickle.dump(feature_text, open(config.feature_text,'wb'))
+            pickle.dump(feature_text, open(config.feature_text, 'wb'))
 
         except Exception as e:
             logging.error("Error occurred in Data Visulaization", exc_info=True)

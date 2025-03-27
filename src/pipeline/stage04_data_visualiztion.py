@@ -13,7 +13,7 @@ class DataVizPipeline:
     def main():
         config = ConfigurationManager()
         data_viz_config = config.get_data_visualization_config()
-        data = pd.read_csv("artifacts/cleaned_data/missing_value_imputed.csv")
+        data = pd.read_csv(data_viz_config.missing_value_imputed)
 
         logging.info(">>>>>Feature Selection Started...<<<<<")
         data_viz_strategy = DataVisualization(data=data, strategy=Datavisualization(), config=data_viz_config)

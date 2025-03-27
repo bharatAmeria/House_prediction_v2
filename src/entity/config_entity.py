@@ -43,5 +43,10 @@ class DataVisualizationConfig:
     missing_value_imputed: Path
     gurgaon_properties: Path
 
-
-
+# @dataclass
+# class RecommendSysConfig:
+#     recommend_dir: Path
+#     appartments_path: Path
+#     cosine1: Path
+#     cosine2: Path
+#     cosine3: Path
