@@ -6,7 +6,7 @@ pipeline {
     }
 
     triggers {
-        pollSCM('* * * * *')  // Polls the repo every minute for changes
+        pollSCM('*')  // Polls the repo every minute for changes
     }
 
     stages {
