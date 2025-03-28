@@ -29,33 +29,9 @@ pipeline {
             }
         }
 
-        stage('Data Ingestion') {
-            steps {
-                sh './tracker/bin/python src/pipeline/stage01_data_ingestion.py'
-            }
-        }
-
-        stage('Data Preprocessing') {
-            steps {
-                sh './tracker/bin/python src/pipeline/stage02_data_cleaning.py'
-            }
-        }
-
-        stage('Feature Selection') {
-            steps {
-                sh './tracker/bin/python src/pipeline/stage03_feature_selection.py'
-            }
-        }
-
-        stage('Data Visualization') {
-            steps {
-                sh './tracker/bin/python src/pipeline/stage04_data_visualiztion.py'
-            }
-        }
-
         stage('Recommender System') {
             steps {
-                sh './tracker/bin/python src/pipeline/stage05_recommender_system.py'
+                sh './tracker/bin/python runPipeline.py'
             }
         }
     }
