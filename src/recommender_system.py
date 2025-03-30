@@ -1,3 +1,4 @@
+import os
 import ast
 import pickle
 import re
@@ -90,6 +91,10 @@ class RecommenderSystemConfig(RecommendStrategy):
 
             # Compute the cosine similarity matrix
             self.cosine_sim2 = cosine_similarity(self.ohe_df_normalized)
+
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
             pickle.dump(self.cosine_sim2, open("artifacts/model/cosine_sim2", 'wb'))
 
             # Extract distances for each location
@@ -107,6 +112,10 @@ class RecommenderSystemConfig(RecommendStrategy):
             # Apply the scaler to the entire dataframe
             self.location_df_normalized = pd.DataFrame(scaler.fit_transform(location_df), columns=location_df.columns, index=location_df.index)
             self.cosine_sim3 = cosine_similarity(self.location_df_normalized)
+
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
             pickle.dump(self.cosine_sim3, open("artifacts/model/cosine_sim3", 'wb'))
 
         except MyException as e:

@@ -1,3 +1,4 @@
+import os
 import shap
 import numpy as np
 import pandas as pd
@@ -13,7 +14,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import RFE
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
-from src.config.configuration import ConfigurationManager
 from src.constants import *
 from src.entity.config_entity import DataCleaningConfig
 from src.logger import logging
@@ -52,9 +52,11 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             num_imputer = SimpleImputer(strategy="median")
             num_cols = ["built_up_area"]
             df[num_cols] = num_imputer.fit_transform(df[num_cols])
-            
+
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
             df.to_csv("artifacts/model/gurgaon_properties_post_feature_selection_v2.csv", index=False)
-            print(df.info())
 
             data_label_encoded = df
             categorical_cols = df.select_dtypes(include=['object']).columns
@@ -133,6 +135,9 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             export_df = X_label.drop(columns=['pooja room', 'study room', 'others'])
             export_df['price'] = y_label
 
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
             df.to_csv("artifacts/model/gurgaon_properties_post_feature_selection.csv", index=False)
         except MyException as e:
             raise e
