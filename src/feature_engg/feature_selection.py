@@ -32,7 +32,7 @@ class FeatureSelectionStrategy(ABC):
 class FeatureSelectionConfig(FeatureSelectionStrategy):
 
 
-    def handle_FS(self, data: pd.DataFrame) -> pd.DataFrame | pd.Series:
+    def handle_FS(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Feature engineering strategy which preprocesses the data.
         """
