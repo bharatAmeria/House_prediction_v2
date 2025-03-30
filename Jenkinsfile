@@ -29,25 +29,25 @@ pipeline {
             }
         }
 
-        stage('Recommender System') {
+        stage('Data Ingestion') {
             steps {
                 sh './tracker/bin/python src/pipeline/stage01_data_ingestion.py'
             }
         }
 
-        stage('Recommender System') {
+        stage('Data Pre Processing') {
             steps {
                 sh './tracker/bin/python src/pipeline/stage02_data_cleaning.py'
             }
         }
 
-        stage('Recommender System') {
+        stage('Feature Selection') {
             steps {
                 sh './tracker/bin/python src/pipeline/stage03_feature_selection.py'
             }
         }
 
-        stage('Recommender System') {
+        stage('Data Visualization') {
             steps {
                 sh './tracker/bin/python src/pipeline/stage04_data_visualiztion.py'
             }
