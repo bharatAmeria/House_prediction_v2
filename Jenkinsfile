@@ -58,6 +58,40 @@ pipeline {
                 sh './tracker/bin/python src/pipeline/stage05_recommender_system.py'
             }
         }
+
+        stage('Model Training') {
+            steps {
+                sh './tracker/bin/python src/pipeline/stage06_model_training.py'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Stop & remove any existing container before starting a new one
+                    sh "docker stop ${CONTAINER_NAME} || true && docker rm ${CONTAINER_NAME} || true"
+
+                    // Run container
+                    sh "docker run -d --name ${CONTAINER_NAME} -p 8081:8081 ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Verify Running Container') {
+            steps {
+                script {
+                    sh "docker ps -a"
+                }
+            }
+        }
     }
 
     post {

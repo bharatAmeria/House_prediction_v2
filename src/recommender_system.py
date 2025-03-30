@@ -54,6 +54,7 @@ class RecommenderSystemConfig(RecommendStrategy):
 
             self.cosine_sim1 = cosine_similarity(tfidf_matrix, tfidf_matrix)
             pickle.dump(self.cosine_sim1, open(config.cosine1, 'wb'))
+
             df[['PropertyName','PriceDetails']]['PriceDetails'][1]
 
             # Apply the refined parsing and generate the new DataFrame structure
@@ -89,7 +90,7 @@ class RecommenderSystemConfig(RecommendStrategy):
 
             # Compute the cosine similarity matrix
             self.cosine_sim2 = cosine_similarity(self.ohe_df_normalized)
-            # pickle.dump(self.cosine_sim2, open(config.cosine2, 'wb'))
+            pickle.dump(self.cosine_sim2, open("artifacts/model/cosine_sim2", 'wb'))
 
             # Extract distances for each location
             location_matrix = {}
@@ -106,7 +107,7 @@ class RecommenderSystemConfig(RecommendStrategy):
             # Apply the scaler to the entire dataframe
             self.location_df_normalized = pd.DataFrame(scaler.fit_transform(location_df), columns=location_df.columns, index=location_df.index)
             self.cosine_sim3 = cosine_similarity(self.location_df_normalized)
-            # pickle.dump(self.cosine_sim3, open(config.cosine3, 'wb'))
+            pickle.dump(self.cosine_sim3, open("artifacts/model/cosine_sim3", 'wb'))
 
         except MyException as e:
             logging.error("Error occurred in Data Visulaization", exc_info=True)

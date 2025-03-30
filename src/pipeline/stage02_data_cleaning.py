@@ -36,8 +36,6 @@ class DataProcessingPipeline:
         logging.info("Merging Flats and House cleaned data")
         merged_data = pd.concat([flats_cleaned_data, house_cleaned_data],ignore_index=True)
 
-        print(merged_data.info())
-
         logging.info(">>>>>Levael-2 Data Preprocessing Started...<<<<<")
         data_cleaning = DataPreProcessing(data=merged_data,strategy=DataPreprocessStrategy())
         cleaned_data = data_cleaning.handle_data()

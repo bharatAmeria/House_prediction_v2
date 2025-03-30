@@ -32,13 +32,15 @@ class ModelTrainingConfig(ModelTrainingStrategy):
 
         try:
             df = data
+            df['luxury_category'].fillna(df['luxury_category'].mode()[0], inplace=True)
 
             # Replace numeric furnishing_type values with categorical labels
             df['furnishing_type'] = df['furnishing_type'].replace({0.0: 'unfurnished', 1.0: 'semifurnished', 2.0: 'furnished'})
 
             # Define features and target variable
             X = df.drop(columns=['price'])
-            y = np.log1p(df['price'])  # Log-transform the target variable
+            print(X.info())
+            y = np.log1p(df['price'])
 
             # Define numerical and categorical features
             num_features = ['bedRoom', 'bathroom', 'built_up_area', 'servant room', 'store room']
@@ -47,61 +49,41 @@ class ModelTrainingConfig(ModelTrainingStrategy):
             # Fix: Handle unknown categories in encoding
             ordinal_encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
 
-            # Creating a column transformer for preprocessing
+            # Create a column transformer for preprocessing
             preprocessor = ColumnTransformer(
                 transformers=[
-                    ('num', StandardScaler(), ['bedRoom', 'bathroom', 'built_up_area', 'servant room', 'store room']),
-                    ('cat', OrdinalEncoder(), cat_features)
-                ], 
+                    ('num', StandardScaler(), num_features),
+                    ('cat', ordinal_encoder, cat_features),
+                    ('cat1',OneHotEncoder(handle_unknown="ignore"), ['sector','agePossession']),
+                    ('target_enc', ce.TargetEncoder(), ['sector'])  # Target encoding for 'sector'
+                ],
                 remainder='passthrough'
             )
 
-            # Creating a pipeline
+            # Create pipeline
             pipeline = Pipeline([
                 ('preprocessor', preprocessor),
-                ('regressor', LinearRegression())
-                ])
-            # # Create a column transformer for preprocessing
-            # preprocessor = ColumnTransformer(
-            #     transformers=[
-            #         ('num', StandardScaler(), num_features),
-            #         ('cat', ordinal_encoder, cat_features),
-            #         ('cat1',OneHotEncoder(), ['sector','agePossession']),
-            #         ('target_enc', ce.TargetEncoder(), ['sector'])  # Target encoding for 'sector'
-            #     ],
-            #     remainder='passthrough'
-            # )
+                ('regressor', RandomForestRegressor(random_state=42))  # Added random_state for reproducibility
+            ])
 
-            # # Create pipeline
-            # pipeline = Pipeline([
-            #     ('preprocessor', preprocessor),
-            #     ('regressor', RandomForestRegressor(random_state=42))  # Added random_state for reproducibility
-            # ])
-
-            # # Define parameter grid
-            # param_grid = {
-            #     'regressor__n_estimators': [50, 100, 200, 300],
-            #     'regressor__max_depth': [None, 10, 20, 30],
-            #     'regressor__max_samples': [0.1, 0.25, 0.5, 1.0],
-            #     'regressor__max_features': ['sqrt', 'log2']  # Replaced 'auto' with 'sqrt' and 'log2'
-            # }
+            # Define parameter grid
+            param_grid = {
+                'regressor__n_estimators': [50, 100, 200, 300],
+                'regressor__max_depth': [None, 10, 20, 30],
+                'regressor__max_samples': [0.1, 0.25, 0.5, 1.0],
+                'regressor__max_features': ['sqrt', 'log2']  # Replaced 'auto' with 'sqrt' and 'log2'
+            }
 
             # K-fold cross-validation
             kfold = KFold(n_splits=10, shuffle=True, random_state=42)
-            scores = cross_val_score(pipeline, X, y, cv=kfold, scoring='r2')
+            search = GridSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4)
+            search.fit(X, y)
 
-            X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
-
-            pipeline.fit(X_train,y_train)
-            y_pred = pipeline.predict(X_test)
-            y_pre = np.expm1(y_pred)
-            print (mean_absolute_error(np.expm1(y_test),y_pre))
-
-            # with open('pipeline.pkl', 'wb') as file:
-            #     pickle.dump(pipeline, file)
+            with open('pipeline.pkl', 'wb') as file:
+                pickle.dump(pipeline, file)
             
-            # with open('df.pkl', 'wb') as file:
-            #     pickle.dump(X, file)
+            with open('df.pkl', 'wb') as file:
+                pickle.dump(X, file)
         
         except Exception as e:
             logging.error("Error occurred while extracting zip file", exc_info=True)

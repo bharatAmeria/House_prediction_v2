@@ -47,12 +47,14 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             df['floor_category'] = df['floorNum'].apply(self.categorize_floor)
             df.drop(columns=['floorNum', 'luxury_score'], inplace=True)
             
-            df.to_csv("gurgaon_properties_post_feature_selection_v2.csv", index=False)
-
+            
             logging.info("Handling missing values using median imputation")
             num_imputer = SimpleImputer(strategy="median")
             num_cols = ["built_up_area"]
             df[num_cols] = num_imputer.fit_transform(df[num_cols])
+            
+            df.to_csv("artifacts/model/gurgaon_properties_post_feature_selection_v2.csv", index=False)
+            print(df.info())
 
             data_label_encoded = df
             categorical_cols = df.select_dtypes(include=['object']).columns
@@ -131,7 +133,7 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             export_df = X_label.drop(columns=['pooja room', 'study room', 'others'])
             export_df['price'] = y_label
 
-            df.to_csv("gurgaon_properties_post_feature_selection.csv", index=False)
+            df.to_csv("artifacts/model/gurgaon_properties_post_feature_selection.csv", index=False)
         except MyException as e:
             raise e
         

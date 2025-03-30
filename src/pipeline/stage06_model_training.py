@@ -10,7 +10,7 @@ class ModelPipeline:
     @staticmethod
     def main():
         
-        df = pd.read_csv("gurgaon_properties_post_feature_selection_v2.csv")
+        df = pd.read_csv("artifacts/model/gurgaon_properties_post_feature_selection_v2.csv")
 
         logging.info(">>>>>Model Training Started...<<<<<")
         model_training_strategy = ModelTraining(data=df, strategy=ModelTrainingConfig())
