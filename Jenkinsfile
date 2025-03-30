@@ -31,7 +31,31 @@ pipeline {
 
         stage('Recommender System') {
             steps {
-                sh './tracker/bin/python runPipeline.py'
+                sh './tracker/bin/python src/pipeline/stage01_data_ingestion.py'
+            }
+        }
+
+        stage('Recommender System') {
+            steps {
+                sh './tracker/bin/python src/pipeline/stage02_data_cleaning.py'
+            }
+        }
+
+        stage('Recommender System') {
+            steps {
+                sh './tracker/bin/python src/pipeline/stage03_feature_selection.py'
+            }
+        }
+
+        stage('Recommender System') {
+            steps {
+                sh './tracker/bin/python src/pipeline/stage04_data_visualiztion.py'
+            }
+        }
+
+        stage('Recommender System') {
+            steps {
+                sh './tracker/bin/python src/pipeline/stage05_recommender_system.py'
             }
         }
     }
