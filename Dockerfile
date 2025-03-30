@@ -1,21 +1,22 @@
-# Use the official Python image as the base
-FROM python:3.10-slim
+FROM python:3.9-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the application files into the container
 COPY app/ /app/
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies required for building Python packages
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    libffi-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*  # Clean up to reduce image size
 
-# Expose the Streamlit default port
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip
+
+RUN pip install -r requirements.txt
+
 EXPOSE 8501
 
-# Set Streamlit config (optional)
-ENV STREAMLIT_SERVER_PORT=8501
-ENV STREAMLIT_SERVER_HEADLESS=true
-
-# Run the Streamlit app
-CMD ["streamlit", "run", "home.py"]
+CMD ["streamlit", "run", "Home.py", "--server.port=8501"]

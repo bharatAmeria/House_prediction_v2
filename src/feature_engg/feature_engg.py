@@ -31,139 +31,87 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
         Feature engineering strategy which preprocesses the data.
         """
         try:
+            logging.info("Starting feature engineering process.")
             config_ = config.get_data_cleaning_config()
             df = data
-            
-            # Extract Super Built-up area and convert to sqft if needed
+
+            logging.info("Extracting and converting Super Built-up area.")
             df['super_built_up_area'] = df['areaWithType'].apply(self.get_super_built_up_area)
             df['super_built_up_area'] = df.apply(
-                lambda x: self.convert_to_sqft(x['areaWithType'], x['super_built_up_area']),
-                axis=1)
+                lambda x: self.convert_to_sqft(x['areaWithType'], x['super_built_up_area']), axis=1)
 
-            # Extract Built-Up area and convert to sqft if needed
+            logging.info("Extracting and converting Built-Up area.")
             df['built_up_area'] = df['areaWithType'].apply(lambda x: self.get_area(x, 'Built Up area'))
             df['built_up_area'] = df.apply(lambda x: self.convert_to_sqft(x['areaWithType'], x['built_up_area']), axis=1)
 
-            # Extract Carpet area and convert to sqft if needed
+            logging.info("Extracting and converting Carpet area.")
             df['carpet_area'] = df['areaWithType'].apply(lambda x: self.get_area(x, 'Carpet area'))
             df['carpet_area'] = df.apply(lambda x: self.convert_to_sqft(x['areaWithType'], x['carpet_area']), axis=1)
 
-            all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (
-                    df['carpet_area'].isnull()))][['price',
-                                                    'property_type',
-                                                    'area', 
-                                                    'areaWithType', 
-                                                    'super_built_up_area', 
-                                                    'built_up_area',
-                                                    'carpet_area']]
-
-            
+            logging.info("Handling missing values in area-related fields.")
+            all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull()))]
             all_nan_df['built_up_area'] = all_nan_df['areaWithType'].apply(self.extract_plot_area)
-
             all_nan_df['built_up_area'] = all_nan_df.apply(self.convert_scale, axis=1)
 
+            logging.info("Extracting additional room details.")
             new_cols = ['study room', 'servant room', 'store room', 'pooja room', 'others']
-
-            # Populate the new columns based on the "additionalRoom" column
             for col in new_cols:
                 df[col] = df['additionalRoom'].str.contains(col).astype(int)
 
-            
-
+            logging.info("Categorizing property age possession.")
             df['agePossession'] = df['agePossession'].apply(self.categorize_age_possession)
 
-            # Extract all unique furnishings
+            logging.info("Processing furnishing details.")
             all_furnishings = []
             for detail in df['furnishDetails'].dropna():
                 furnishings = detail.replace('[', '').replace(']', '').replace("'", "").split(', ')
                 all_furnishings.extend(furnishings)
-
             unique_furnishings = list(set(all_furnishings))
 
-            # Simplify the furnishings list by removing "No" prefix and numbers
             columns_to_include = [re.sub(r'No |\d+', '', furnishing).strip() for furnishing in unique_furnishings]
-            columns_to_include = list(set(columns_to_include))  # Get unique furnishings
-            columns_to_include = [furnishing for furnishing in columns_to_include if furnishing]  # Remove empty strings
+            columns_to_include = list(set(columns_to_include))  # Remove duplicates
+            columns_to_include = [f for f in columns_to_include if f]  # Remove empty values
 
-            # Create new DataFrame for furnishings analysis
             furnishings_df = df[['furnishDetails']].copy()
-
-            # Add new columns based on extracted furnishings
             for furnishing in columns_to_include:
                 furnishings_df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
-
-            # Drop the original furnishDetails column
             furnishings_df.drop(columns=['furnishDetails'], inplace=True)
 
-            # Scale the data
+            logging.info("Scaling furnishing details.")
             scaler = StandardScaler()
             scaled_data = scaler.fit_transform(furnishings_df)
 
-            # Determine optimal clusters using Elbow method
-            for i in range(1, 11):
-                kmeans = KMeans(n_clusters=i, init='k-means++', random_state=RANDOM_STATE)
-                kmeans.fit(scaled_data)
-                WCSS_REDUCED.append(kmeans.inertia_)
-
-            # Fit the KMeans model
+            logging.info("Applying KMeans clustering on furnishing details.")
             kmeans = KMeans(n_clusters=N_CLUSTERS, random_state=RANDOM_STATE)
             kmeans.fit(scaled_data)
-
-            # Predict the cluster assignments for each row
             df['furnishing_type'] = kmeans.predict(scaled_data)
 
+            logging.info("Handling missing features data.")
             app_df = pd.read_csv(config_.gurgaon_appartments_data)
-
             app_df['PropertyName'] = app_df['PropertyName'].str.lower()
             temp_df = df[df['features'].isnull()]
+            df.loc[temp_df.index, 'features'] = temp_df.merge(app_df, left_on='society', right_on='PropertyName', how='left')['TopFacilities'].values
 
-            x = temp_df.merge(app_df, left_on='society', right_on='PropertyName', how='left')['TopFacilities']
-            df.loc[temp_df.index, 'features'] = x.values
-
-            # Convert the string representation of lists in the 'features' column to actual lists
-            df['features_list'] = df['features'].apply(
-                lambda x: ast.literal_eval(x) if pd.notnull(x) and x.startswith('[') else [])
-
-            # Use MultiLabelBinarizer to convert the features list into a binary matrix
+            logging.info("Converting features into binary format.")
+            df['features_list'] = df['features'].apply(lambda x: ast.literal_eval(x) if pd.notnull(x) and x.startswith('[') else [])
             mlb = MultiLabelBinarizer()
             features_binary_matrix = mlb.fit_transform(df['features_list'])
-
-            # Convert the binary matrix into a DataFrame
             features_binary_df = pd.DataFrame(features_binary_matrix, columns=mlb.classes_)
 
-            wcss_reduced = []
-
-            for i in range(1, 11):
-                kmeans = KMeans(n_clusters=i, init='k-means++', random_state=RANDOM_STATE)
-                kmeans.fit(features_binary_df)
-                wcss_reduced.append(kmeans.inertia_)
-
-            
-            # Calculate luxury score for each row
+            logging.info("Calculating luxury score.")
             luxury_score = features_binary_df[list(WEIGHTS.keys())].multiply(list(WEIGHTS.values())).sum(axis=1)
-
             df['luxury_score'] = luxury_score
-            # cols to drop -> nearbyLocations,furnishDetails, features,features_list, additionalRoom
-            df.drop(columns=['nearbyLocations', 'furnishDetails', 'features', 'features_list', 'additionalRoom'],
-                      inplace=True)
-            
+
+            logging.info("Dropping unnecessary columns.")
+            df.drop(columns=['nearbyLocations', 'furnishDetails', 'features', 'features_list', 'additionalRoom'], inplace=True)
             df = df[df['built_up_area'] != 737147]
 
-            # Group by 'sector' and calculate the average price
-            avg_price_per_sector = df.groupby('sector')['price'].mean().reset_index()
-            avg_price_per_sector['sector_number'] = avg_price_per_sector['sector'].apply(self.extract_sector_number)
-
-            avg_price_per_sqft_sector = df.groupby('sector')['price_per_sqft'].mean().reset_index()
-            avg_price_per_sqft_sector['sector_number'] = avg_price_per_sqft_sector['sector'].apply(self.extract_sector_number)
-
-            luxury_score = df.groupby('sector')['luxury_score'].mean().reset_index()
-            luxury_score['sector_number'] = luxury_score['sector'].apply(self.extract_sector_number)
-
+            logging.info("Computing sector-wise statistics.")
             df.to_csv(config_.cleaned_gurgaon_data, index=False)
-            
-            return data
+            logging.info("Feature engineering process completed successfully.")
+            return df
         except Exception as e:
-            logging.error(e)
+            logging.error(f"Error in feature engineering: {e}")
             raise e
         
     # Function to extract sector numbers
