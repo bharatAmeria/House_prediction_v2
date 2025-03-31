@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: streamlit-monitor
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: streamlit
+  podMetricsEndpoints:
+    - port: http
+      interval: 10s

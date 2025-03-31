@@ -5,14 +5,11 @@ import numpy as np
 
 st.set_page_config(page_title="Viz Demo")
 
+with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/app/datasets/df.pkl','rb') as file:
+    df = pickle.load(file)
 
-df = pd.read_pickle("app/pages/df.pkl")
-pipeline = pd.read_pickle("app/pages/pipeline.pkl")
-# with open('app/pages/df.pkl','rb') as file:
-#     df = pickle.load(file)
-
-# with open('app/pages/pipeline.pkl','rb') as file:
-#     pipeline = pickle.load(file)
+with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/app/datasets/pipeline.pkl','rb') as file:
+    pipeline = pickle.load(file)
 
 
 st.header('Enter your inputs')

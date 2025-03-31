@@ -1,4 +1,4 @@
-
+import os
 import sys
 import pickle
 import numpy as np
@@ -78,10 +78,16 @@ class ModelTrainingConfig(ModelTrainingStrategy):
             search = GridSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4)
             search.fit(X, y)
 
-            with open('pipeline.pkl', 'wb') as file:
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
+            with open('artifacts/model/pipeline.pkl', 'wb') as file:
                 pickle.dump(pipeline, file)
             
-            with open('df.pkl', 'wb') as file:
+            # Ensure the directory exists
+            output_dir = "artifacts/model"
+            os.makedirs(output_dir, exist_ok=True)
+            with open('artifacts/model/df.pkl', 'wb') as file:
                 pickle.dump(X, file)
         
         except Exception as e:

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: streamlit-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/bharatAmeria/House_prediction_v2.git
+    path: manifests
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
