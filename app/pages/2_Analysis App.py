@@ -10,8 +10,8 @@ st.set_page_config(page_title="Plotting Demo")
 
 st.title('Analytics')
 
-new_df = pd.read_csv('datasets/data_viz1.csv')
-feature_text = pickle.load(open('datasets/feature_text.pkl','rb'))
+new_df = pd.read_csv('/Users/bharataameriya/Documents/Project/House_prediction_v2/artifacts/model/data_viz1.csv')
+feature_text = pickle.load(open('/Users/bharataameriya/Documents/Project/House_prediction_v2/artifacts/model/feature_text.pkl','rb'))
 
 
 group_df = new_df.groupby('sector').mean()[['price','price_per_sqft','built_up_area','latitude','longitude']]
