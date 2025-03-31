@@ -52,6 +52,8 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull()))]
             all_nan_df['built_up_area'] = all_nan_df['areaWithType'].apply(self.extract_plot_area)
             all_nan_df['built_up_area'] = all_nan_df.apply(self.convert_scale, axis=1)
+            # update the original dataframe
+            df.update(all_nan_df)
 
             logging.info("Extracting additional room details.")
             new_cols = ['study room', 'servant room', 'store room', 'pooja room', 'others']
@@ -63,6 +65,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
 
             logging.info("Processing furnishing details.")
             all_furnishings = []
+
             for detail in df['furnishDetails'].dropna():
                 furnishings = detail.replace('[', '').replace(']', '').replace("'", "").split(', ')
                 all_furnishings.extend(furnishings)
@@ -72,7 +75,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             columns_to_include = list(set(columns_to_include))  # Remove duplicates
             columns_to_include = [f for f in columns_to_include if f]  # Remove empty values
 
-            furnishings_df = df[['furnishDetails']].copy()
+            furnishings_df = df[['furnishDetails']]
             for furnishing in columns_to_include:
                 furnishings_df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
             furnishings_df.drop(columns=['furnishDetails'], inplace=True)
@@ -84,7 +87,12 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             logging.info("Applying KMeans clustering on furnishing details.")
             kmeans = KMeans(n_clusters=N_CLUSTERS, random_state=RANDOM_STATE)
             kmeans.fit(scaled_data)
-            df['furnishing_type'] = kmeans.predict(scaled_data)
+
+            # Predict the cluster assignments for each row
+            cluster_assignments = kmeans.predict(scaled_data)
+            df = df.iloc[:,:-18]
+            df['furnishing_type'] = cluster_assignments
+
 
             logging.info("Handling missing features data.")
             app_df = pd.read_csv(config_.gurgaon_appartments_data)

@@ -22,15 +22,14 @@ class OutlierProcessStrategy(OutlierStrategy):
         try:
              
             df = data
+            df.drop_duplicates()
 
-            outlier_price = self.detect_outliers_iqr(df, 'price')
             outlier_sqft = self.detect_outliers_iqr(df, 'area')
 
-            outlier_price = outlier_price.sort_values('price', ascending=False).head(20)
             outlier_sqft['area'] = outlier_sqft['area'].apply(lambda x: x * 9 if x < 1000 else x)
             outlier_sqft['price_per_sqft'] = round((outlier_sqft['price'] * 10000000) / outlier_sqft['area'])
-
             df.update(outlier_sqft)
+            
             df.drop(index=[818, 1796, 1123, 2, 2356, 115, 3649, 2503, 1471], inplace=True, errors='ignore')
             
             df.loc[48, 'area'] = 115 * 9

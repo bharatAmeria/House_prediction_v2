@@ -58,9 +58,6 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
             df['society'] = df['society'].astype(str).apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', name).strip().lower())
             df['society'] = df['society'].replace('nan', 'independent')
 
-            logging.info("Filtering out 'Price on Request' values...")
-            df = df[df['price'] != 'Price on Request']
-
             logging.info("Processing price column...")
             df['price'] = df['price'].str.split(' ').apply(self.treat_price)
 
@@ -76,7 +73,6 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
             )
 
             logging.info("Cleaning 'bedRoom' column...")
-            df = df[~df['bedRoom'].isnull()]
             df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
 
             logging.info("Cleaning 'bathroom' column...")

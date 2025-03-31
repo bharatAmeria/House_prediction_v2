@@ -22,7 +22,7 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
     def handle_data(self, data: pd.DataFrame) -> pd.DataFrame:
         logging.info("Starting flats data Pre-Processing...")
         try:
-            df = data.copy()
+            df = data
             logging.debug("Original DataFrame shape: %s", df.shape)
 
             df.drop(columns=['link', 'property_id'], inplace=True)
@@ -51,7 +51,6 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
             )
             logging.debug("Processed 'price_per_sqft' column")
 
-            df = df[~df['bedRoom'].isnull()]
             df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
             logging.debug("Processed 'bedRoom' column")
 

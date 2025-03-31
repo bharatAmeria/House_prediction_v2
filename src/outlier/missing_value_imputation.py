@@ -53,10 +53,12 @@ class MissingValueStrategy(MissingValueImputationStrategy):
             df.drop(columns=['area',
                              'areaWithType',
                              'super_built_up_area',
-                             'carpet_area'],inplace=True)
+                             'carpet_area',
+                             'area_room_ratio'],inplace=True)
             
             # Floor Num
             df['floorNum'].fillna(2.0,inplace=True)
+            1011/df.shape[0]
             df.drop(columns=['facing'],inplace=True)
             df.drop(index=[2536],inplace=True)
 

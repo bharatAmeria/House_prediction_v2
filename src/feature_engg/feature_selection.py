@@ -47,7 +47,20 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             df['floor_category'] = df['floorNum'].apply(self.categorize_floor)
             df.drop(columns=['floorNum', 'luxury_score'], inplace=True)
             
-            
+            # Create a copy of the original data for label encoding
+            data_label_encoded = df
+            categorical_cols = df.select_dtypes(include=['object']).columns
+
+            # Apply label encoding to categorical columns
+            for col in categorical_cols:
+                oe = OrdinalEncoder()
+                data_label_encoded[col] = oe.fit_transform(data_label_encoded[[col]])
+                print(oe.categories_)
+
+            # Splitting the dataset into training and testing sets
+            X_label = data_label_encoded.drop('price', axis=1)
+            y_label = data_label_encoded['price']
+                        
             logging.info("Handling missing values using median imputation")
             num_imputer = SimpleImputer(strategy="median")
             num_cols = ["built_up_area"]
@@ -69,7 +82,6 @@ class FeatureSelectionConfig(FeatureSelectionStrategy):
             logging.info("Splitting dataset into features and target variable")
             X_label = data_label_encoded.drop('price', axis=1)
             y_label = data_label_encoded['price']
-            y_label = num_imputer.fit_transform(y_label.values.reshape(-1, 1)).ravel()
 
             logging.info("Computing correlation analysis")
             fi_df1 = data_label_encoded.corr()['price'].iloc[1:].to_frame().reset_index().rename(columns={'index': 'feature', 'price': 'corr_coeff'})
