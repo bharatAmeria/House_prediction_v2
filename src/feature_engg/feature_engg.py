@@ -49,7 +49,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             df['carpet_area'] = df.apply(lambda x: self.convert_to_sqft(x['areaWithType'], x['carpet_area']), axis=1)
 
             logging.info("Handling missing values in area-related fields.")
-            all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull()))]
+            all_nan_df = df[((df['super_built_up_area'].isnull()) & (df['built_up_area'].isnull()) & (df['carpet_area'].isnull()))][['price','property_type','area','areaWithType','super_built_up_area','built_up_area','carpet_area']]
             all_nan_df['built_up_area'] = all_nan_df['areaWithType'].apply(self.extract_plot_area)
             all_nan_df['built_up_area'] = all_nan_df.apply(self.convert_scale, axis=1)
             # update the original dataframe
@@ -64,21 +64,25 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             df['agePossession'] = df['agePossession'].apply(self.categorize_age_possession)
 
             logging.info("Processing furnishing details.")
-            all_furnishings = []
 
+            all_furnishings = []
             for detail in df['furnishDetails'].dropna():
                 furnishings = detail.replace('[', '').replace(']', '').replace("'", "").split(', ')
                 all_furnishings.extend(furnishings)
             unique_furnishings = list(set(all_furnishings))
 
+            # Simplify the furnishings list by removing "No" prefix and numbers
             columns_to_include = [re.sub(r'No |\d+', '', furnishing).strip() for furnishing in unique_furnishings]
-            columns_to_include = list(set(columns_to_include))  # Remove duplicates
-            columns_to_include = [f for f in columns_to_include if f]  # Remove empty values
+            columns_to_include = list(set(columns_to_include))  # Get unique furnishings
+            columns_to_include = [furnishing for furnishing in columns_to_include if furnishing]  # Remove empty strings
 
-            furnishings_df = df[['furnishDetails']]
+            # Create new columns for each unique furnishing and populate with counts
             for furnishing in columns_to_include:
-                furnishings_df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
-            furnishings_df.drop(columns=['furnishDetails'], inplace=True)
+                df[furnishing] = df['furnishDetails'].apply(lambda x: self.get_furnishing_count(x, furnishing))
+
+            # Create the new dataframe with the required columns
+            furnishings_df = df[['furnishDetails'] + columns_to_include]
+            furnishings_df.drop(columns=['furnishDetails'],inplace=True)
 
             logging.info("Scaling furnishing details.")
             scaler = StandardScaler()
@@ -93,7 +97,7 @@ class FeatureEngineeringConfig(FeatureEngineeringStrategy):
             df = df.iloc[:,:-18]
             df['furnishing_type'] = cluster_assignments
 
-
+            
             logging.info("Handling missing features data.")
             app_df = pd.read_csv(config_.gurgaon_appartments_data)
             app_df['PropertyName'] = app_df['PropertyName'].str.lower()

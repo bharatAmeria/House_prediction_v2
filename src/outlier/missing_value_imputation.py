@@ -53,8 +53,7 @@ class MissingValueStrategy(MissingValueImputationStrategy):
             df.drop(columns=['area',
                              'areaWithType',
                              'super_built_up_area',
-                             'carpet_area',
-                             'area_room_ratio'],inplace=True)
+                             'carpet_area'],inplace=True)
             
             # Floor Num
             df['floorNum'].fillna(2.0,inplace=True)

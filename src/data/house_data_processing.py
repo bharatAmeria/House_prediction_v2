@@ -55,6 +55,7 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
             df.rename(columns={'rate': 'price_per_sqft'}, inplace=True)
 
             logging.info("Cleaning 'society' column...")
+            df = df[df['price'] != 'Price on Request']
             df['society'] = df['society'].astype(str).apply(lambda name: re.sub(r'\d+(\.\d+)?\s?★', '', name).strip().lower())
             df['society'] = df['society'].replace('nan', 'independent')
 
@@ -73,6 +74,7 @@ class HouseDataPreProcessingStrategy(HouseDataStrategy):
             )
 
             logging.info("Cleaning 'bedRoom' column...")
+            df = df[~df['bedRoom'].isnull()]
             df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
 
             logging.info("Cleaning 'bathroom' column...")

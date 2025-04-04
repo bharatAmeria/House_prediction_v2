@@ -51,6 +51,7 @@ class FlatsDataPreProcessingStrategy(FlatsDataStrategy):
             )
             logging.debug("Processed 'price_per_sqft' column")
 
+            df = df[~df['bedRoom'].isnull()]
             df['bedRoom'] = df['bedRoom'].str.split(' ').str.get(0).astype(int)
             logging.debug("Processed 'bedRoom' column")
 
