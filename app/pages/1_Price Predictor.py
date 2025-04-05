@@ -5,10 +5,10 @@ import numpy as np
 
 st.set_page_config(page_title="Viz Demo")
 
-with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/app/datasets/df.pkl','rb') as file:
+with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/artifacts/model/df.pkl','rb') as file:
     df = pickle.load(file)
 
-with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/app/datasets/pipeline.pkl','rb') as file:
+with open('/Users/bharataameriya/Documents/Project/House_prediction_v2/artifacts/model/pipeline.pkl','rb') as file:
     pipeline = pickle.load(file)
 
 
