@@ -113,3 +113,6 @@ PARAM_GRID = {
 }
 
 COLUMNS_TO_ENCODE = ['property_type','sector', 'balcony', 'agePossession', 'furnishing_type', 'luxury_category', 'floor_category']
+
+REQUIRED_PYTHON = "python3"
+REQUIREMENTS_FILE = "requirements.txt"

@@ -2,10 +2,7 @@ import sys
 import subprocess
 import logging
 from pathlib import Path
-
-REQUIRED_PYTHON = "python3"
-REQUIREMENTS_FILE = "requirements.txt"
-
+from src.constants import REQUIREMENTS_FILE, REQUIRED_PYTHON
 
 def check_python_version():
     """Ensure the correct Python version is being used."""
