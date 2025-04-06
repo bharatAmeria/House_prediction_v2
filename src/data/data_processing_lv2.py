@@ -28,7 +28,7 @@ class DataPreprocessStrategy(DataStrategy):
         """
         try:
             logging.info("Starting data preprocessing")
-            df = data
+            df = data.copy()
             df.insert(loc=3, column='sector',
                       value=df['property_name'].str.split('in').str.get(1).str.replace('Gurgaon', '').str.strip())
             

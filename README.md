@@ -32,7 +32,7 @@ under the remaining 600 societies
     - Very High (>100): 3 sectors have more than 100 listings.
     - High (50-100): 25 sectors have between 50 to 100 listings.
     - Average (10-49): A majority, 60 sectors, fall in this range with 10 to 49 listings each.
-    - Low (2-9): 16 sectors have between 2 to 9 listings.
+    - Low (2-9): 16 sectors have between 2 to 9 listings. 
     - Very Low (1): Interestingly, there are no sectors with only 1 listing.
 
 ### Price

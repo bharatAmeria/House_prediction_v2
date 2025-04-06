@@ -5,7 +5,7 @@ import mlflow
 from sklearn.base import RegressorMixin
 
 from src import logger
-from src.components.evaluation import MSE, R2Score, RMSE
+# from src.components.evaluation import MSE, R2Score, RMSE
 
 
 def evaluation(
